@@ -1,0 +1,1443 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Materi Interaktif: Struktur Data</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Nunito:wght@400;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: { extend: {
+                fontFamily: { 
+                    sans: ['Nunito', 'sans-serif'], 
+                    heading: ['Poppins', 'sans-serif'], 
+                    mono: ['JetBrains Mono', 'monospace'] 
+                },
+                colors: { 
+                    blueBright: '#2196F3', 
+                    blueDark: '#1565C0',   
+                    yellowBright: '#FFC107', 
+                    yellowDark: '#FF8F00', 
+                    bgLight: '#E3F2FD'
+                }
+            }}
+        }
+    </script>
+    <style>
+        * { -webkit-tap-highlight-color: transparent; }
+        
+        /* Background Gradasi Cerah */
+        body {
+            background: linear-gradient(135deg, #E3F2FD 0%, #FFF8E1 100%);
+            background-attachment: fixed;
+            min-height: 100vh;
+            color: #1E293B;
+            overflow-x: hidden;
+        }
+
+        /* Ornamen Dekoratif Statis */
+        .bg-shape {
+            position: fixed; z-index: -1; opacity: 0.5;
+        }
+        .shape-1 { top: -10%; left: -10%; width: 50vw; height: 50vw; background: radial-gradient(circle, #BBDEFB 0%, transparent 70%); }
+        .shape-2 { bottom: -10%; right: -10%; width: 50vw; height: 50vw; background: radial-gradient(circle, #FFECB3 0%, transparent 70%); }
+
+        #zoomWrapper { position: relative; z-index: 1; }
+
+        /* Glassmorphism Ceria */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 3px solid #FFFFFF;
+            box-shadow: 0 8px 0 #E2E8F0, 0 15px 25px -5px rgba(33, 150, 243, 0.2);
+            border-radius: 1.5rem;
+        }
+
+        /* Nav */
+        .nav-btn { color: #475569; border: 2px solid transparent; transition: all 0.2s; font-family: 'Poppins', sans-serif; font-weight: 600; white-space: nowrap; }
+        .nav-btn:hover { color: #2196F3; background: #E3F2FD; }
+        .nav-btn.active { background: #2196F3; color: white; box-shadow: 0 4px 0 #1565C0; border-color: #1565C0; }
+
+        .section-content { display: none; }
+        .section-content.active { display: block; }
+        
+        /* Buttons */
+        .btn-primary { background: #FFC107; color: #1E293B; font-family: 'Poppins', sans-serif; font-weight: 700; border: 3px solid #FF8F00; box-shadow: 0 6px 0 #FF8F00; transition: all 0.1s; }
+        .btn-primary:hover { transform: translateY(2px); box-shadow: 0 4px 0 #FF8F00; filter: brightness(1.05); }
+        .btn-primary:active { transform: translateY(6px); box-shadow: 0 0px 0 #FF8F00; }
+
+        .btn-secondary { background: #2196F3; color: white; font-family: 'Poppins', sans-serif; font-weight: 700; border: 2px solid #1565C0; box-shadow: 0 4px 0 #1565C0; transition: all 0.1s; }
+        .btn-secondary:hover { transform: translateY(2px); box-shadow: 0 2px 0 #1565C0; filter: brightness(1.1); }
+        .btn-secondary:active { transform: translateY(4px); box-shadow: 0 0px 0 #1565C0; }
+
+        /* Video Wrapper */
+        .video-wrapper {
+            position: relative; border-radius: 16px; padding: 6px;
+            background: #FFFFFF;
+            border: 3px solid #90CAF9;
+            box-shadow: 0 8px 15px rgba(33, 150, 243, 0.15);
+            overflow: hidden;
+        }
+        .video-wrapper video, .video-wrapper iframe { 
+            border-radius: 10px; background: #000; width: 100%; height: 100%; object-fit: contain; 
+        }
+
+        /* Sim Animations */
+        .sim-item { animation: popIn 0.3s cubic-bezier(0.34,1.56,0.64,1) forwards; }
+        @keyframes popIn { 0% { opacity: 0; transform: scale(0.5) translateY(20px); } 100% { opacity: 1; transform: scale(1) translateY(0); } }
+        .stack-container { display: flex; flex-direction: column-reverse; justify-content: flex-start; }
+        .queue-container { display: flex; flex-direction: row; justify-content: flex-start; overflow-x: auto; }
+
+        /* Zoom */
+        .zoom-controls {
+            position: fixed; bottom: 24px; right: 24px; z-index: 100;
+            display: flex; flex-direction: column; gap: 6px;
+            background: white; padding: 10px; border-radius: 20px;
+            box-shadow: 0 4px 0 #E2E8F0, 0 10px 20px rgba(0,0,0,0.1); border: 2px solid #E2E8F0;
+        }
+        .zoom-btn { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: 800; background: #F8FAFC; color: #475569; border: 1px solid #E2E8F0; cursor: pointer; transition: all 0.2s; }
+        .zoom-btn:hover { background: #2196F3; color: white; border-color: #2196F3; }
+        .zoom-level { text-align: center; font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; color: #64748B; padding: 2px 0; }
+
+        /* CPU + RAM Scene */
+        .cpu-ram-scene {
+            display: grid; grid-template-columns: minmax(90px, 130px) minmax(40px, 60px) 1fr;
+            gap: 0.75rem; align-items: stretch; padding: 1rem;
+            background: #F1F5F9; border-radius: 1rem; border: 2px solid #E2E8F0;
+            margin: 1rem 0;
+        }
+        .cpu-unit {
+            background: linear-gradient(135deg, #E3F2FD, #BBDEFB);
+            border-radius: 1rem; padding: 0.75rem 0.4rem; text-align: center; color: #0D47A1;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            border: 2px solid #64B5F6; transition: all 0.3s; min-height: 130px;
+        }
+        .cpu-unit.active { box-shadow: 0 0 20px rgba(33, 150, 243, 0.5); border-color: #2196F3; transform: scale(1.02); background: #E3F2FD; }
+        .cpu-unit .chip { font-size: 2rem; margin-bottom: 0.2rem; }
+        .cpu-unit .label { font-size: 0.75rem; font-weight: 800; letter-spacing: 1.5px; }
+        .cpu-unit .cpu-sub { font-size: 0.55rem; margin-top: 1px; opacity: 0.8; }
+        .cpu-unit .status { font-size: 0.6rem; margin-top: 0.4rem; min-height: 2.2em; font-style: italic; line-height: 1.2; color: #1565C0; }
+        
+        .data-bus { display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 0.4rem; }
+        .bus-arrow { font-size: 1.5rem; font-family: 'JetBrains Mono', monospace; color: #CBD5E1; transition: all 0.3s; }
+        .bus-arrow.active { color: #FFC107; text-shadow: 0 0 10px #FFC107; transform: scale(1.3); }
+        
+        .ram-unit { background: white; border: 2px solid #E2E8F0; border-radius: 1rem; padding: 0.75rem; color: #1E293B; }
+        .ram-unit .ram-header { font-size: 0.75rem; font-weight: 800; color: #FF8F00; margin-bottom: 0.1rem; letter-spacing: 1.5px; display: flex; align-items: center; gap: 0.4rem; }
+        .ram-unit .ram-sub { font-size: 0.6rem; color: #64748B; margin-bottom: 0.5rem; font-style: italic; }
+        .ram-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(55px, 1fr)); gap: 0.4rem; }
+        .ram-cell { background: #F8FAFC; border: 2px solid #E2E8F0; border-radius: 8px; padding: 0.5rem 0.2rem; text-align: center; transition: all 0.4s; font-size: 0.7rem; }
+        .ram-cell .addr { font-family: 'JetBrains Mono', monospace; font-size: 0.55rem; color: #64748B; font-weight: 700; }
+        .ram-cell .val { font-weight: 800; margin-top: 0.15rem; color: #0F172A; word-break: break-word; line-height: 1.2; }
+        .ram-cell.fetching { background: #FFECB3; border-color: #FFC107; transform: scale(1.1); box-shadow: 0 0 15px rgba(255, 193, 7, 0.5); z-index: 10; }
+        .ram-cell.fetching .addr, .ram-cell.fetching .val { color: #E65100; }
+        .ram-cell.highlighted { background: #E3F2FD; border-color: #64B5F6; }
+        .ram-cell.empty { background: #F8FAFC; border-style: dashed; opacity: 0.6; }
+
+        .instruction-panel {
+            background: white; border: 2px solid #E2E8F0; border-radius: 12px;
+            padding: 1rem; margin-top: 1rem; color: #334155; font-size: 0.9rem;
+            min-height: 80px; display: flex; align-items: center; gap: 0.75rem;
+            transition: all 0.3s; box-shadow: 0 4px 0 #E2E8F0;
+        }
+        .instruction-panel.highlight { border-color: #FFC107; background: #FFF8E1; box-shadow: 0 4px 0 #FFC107; }
+        .instruction-panel .step-badge { background: #FFC107; color: #1E293B; padding: 0.25rem 0.6rem; border-radius: 6px; font-weight: 800; font-size: 0.75rem; white-space: nowrap; flex-shrink: 0; }
+
+        /* Excel, Editor, Printer */
+        .excel-sheet { border: 2px solid #22C55E; border-radius: 8px; overflow: hidden; display: inline-block; box-shadow: 0 4px 0 #86EFAC; }
+        .excel-sheet table { border-collapse: collapse; background: white; }
+        .excel-sheet th, .excel-sheet td { border: 1px solid #D1D5DB; padding: 10px 18px; font-size: 0.9rem; text-align: center; min-width: 70px; }
+        .excel-sheet th { background: #F0FDF4; color: #166534; font-weight: 800; }
+        .excel-sheet td { cursor: pointer; transition: all 0.2s; font-weight: 600; color: #1E293B; }
+        .excel-sheet td:hover { background: #F0FDF4; }
+        .excel-sheet td.clicked { background: #FFC107; color: #78350F; animation: cellFlash 1s; }
+        @keyframes cellFlash { 0%,100%{background:#FFC107;} 50%{background:#FFE082;} }
+
+        .undo-editor { background: white; border: 2px solid #E2E8F0; border-radius: 12px; padding: 1rem; font-family: 'JetBrains Mono', monospace; color: #1E293B; min-height: 70px; font-size: 1rem; line-height: 1.6; box-shadow: inset 0 2px 5px rgba(0,0,0,0.05); }
+        .undo-editor::before { content: '📝 Dokumen:'; display: block; font-family: 'Nunito', sans-serif; font-size: 0.75rem; color: #64748B; margin-bottom: 0.5rem; font-weight: 700; letter-spacing: 1px; }
+
+        .print-list-item { background: white; border: 2px solid #E2E8F0; border-radius: 8px; padding: 0.6rem 1rem; margin-bottom: 0.5rem; font-size: 0.9rem; display: flex; align-items: center; gap: 0.5rem; color: #1E293B; transition: all 0.3s; box-shadow: 0 2px 0 #E2E8F0; }
+        .print-list-item.printing { background: #FFF8E1; border-color: #FFC107; box-shadow: 0 2px 0 #FFC107; animation: printingPulse 2s infinite; }
+        @keyframes printingPulse { 0%,100%{box-shadow:0 2px 0 #FFC107, 0 0 0 0 rgba(255,193,7,0.2);} 50%{box-shadow:0 2px 0 #FFC107, 0 0 10px 4px rgba(255,193,7,0);} }
+
+        /* Kustomisasi Scrollbar (Menyembunyikan scrollbar di menu navigasi) */
+        ::-webkit-scrollbar { width: 10px; height: 10px; }
+        ::-webkit-scrollbar-track { background: #E3F2FD; border-radius: 8px; }
+        ::-webkit-scrollbar-thumb { background: #90CAF9; border-radius: 8px; border: 2px solid #E3F2FD; }
+        ::-webkit-scrollbar-thumb:hover { background: #64B5F6; }
+        
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="antialiased min-h-screen flex flex-col">
+
+    <!-- Ornamen Background -->
+    <div class="bg-shape shape-1"></div>
+    <div class="bg-shape shape-2"></div>
+
+    <!-- ================= LANDING PAGE ================= -->
+    <div id="landingPage" class="fixed inset-0 z-[200] h-screen w-screen overflow-hidden bg-white/50 backdrop-blur-sm flex items-center justify-center p-4">
+        
+        <div class="w-full max-w-3xl bg-white rounded-3xl border-4 border-[#90CAF9] shadow-[0_10px_0_#90CAF9,0_20px_40px_rgba(33,150,243,0.3)] p-6 sm:p-10 flex flex-col justify-center max-h-[90vh]">
+            
+            <div class="text-center mt-6 mb-8">
+                <!-- Font Jelas Warna Solid -->
+                <h1 class="text-4xl sm:text-5xl text-blueDark font-heading font-extrabold mb-2 tracking-tight">
+                    Selamat Datang
+                </h1>
+                <h2 class="text-3xl sm:text-4xl text-yellowDark font-heading font-extrabold mb-4">
+                    Murid Hebat!
+                </h2>
+                
+                <p class="text-base sm:text-lg text-slate-700 font-semibold font-sans">
+                    Pada Pembelajaran <strong>Informatika</strong> Materi Struktur Data.
+                </p>
+            </div>
+
+            <!-- Petunjuk Penggunaan -->
+            <div class="bg-[#E3F2FD] border-2 border-[#90CAF9] rounded-2xl p-6 text-left mb-8 shadow-inner">
+                <h3 class="font-heading font-bold text-blueDark mb-3 text-lg flex items-center gap-2">
+                    <i class="fas fa-info-circle text-yellowDark"></i> Petunjuk Penggunaan
+                </h3>
+                <ul class="text-sm text-slate-700 space-y-2 font-semibold list-disc list-inside">
+                    <li>Gunakan menu di bagian atas untuk berpindah antar materi.</li>
+                    <li>Tonton video pembelajaran yang tersedia langsung di halaman.</li>
+                    <li>Mainkan simulasi interaktif untuk memahami cara kerja.</li>
+                    <li>Gunakan tombol <strong>+ / -</strong> di pojok kanan bawah untuk zoom.</li>
+                </ul>
+            </div>
+
+            <!-- Tombol -->
+            <div class="text-center mt-auto">
+                <button onclick="startLearning()" class="btn-primary text-xl py-4 px-12 rounded-full inline-flex items-center justify-center gap-3 w-full sm:w-auto">
+                    Ayo Mulai! <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= MAIN APP ================= -->
+    <div id="mainApp" class="hidden flex-col min-h-screen">
+        
+        <!-- HEADER -->
+        <header class="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b-4 border-[#E3F2FD] shadow-sm">
+            <!-- Menggunakan max-w-7xl agar menu muat memanjang -->
+            <div class="max-w-7xl mx-auto px-4 py-3 sm:px-6 lg:px-8 flex flex-col lg:flex-row justify-between items-center gap-3">
+                
+                <!-- Logo / Judul -->
+                <div class="flex items-center gap-3 shrink-0">
+                    <div class="bg-blueBright text-white p-2.5 rounded-xl shadow-[0_4px_0_#1565C0]">
+                        <i class="fas fa-layer-group text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="font-heading font-bold text-xl text-blueDark leading-tight">Materi Struktur Data</h1>
+                        <p class="text-xs text-yellowDark font-bold tracking-wide uppercase font-sans">Informatika | Kelas X</p>
+                    </div>
+                </div>
+
+                <!-- Navigasi Memanjang (Tanpa Wrap) - Urutan Tujuan Dulu Baru Studi Kasus -->
+                <nav class="w-full lg:w-auto overflow-x-auto scrollbar-hide flex flex-nowrap items-center gap-1.5 p-1.5 bg-slate-100 rounded-full border border-slate-200">
+                    <button onclick="showSection('tujuan', this)" class="nav-btn active px-3.5 py-1.5 rounded-full text-sm">🎯 Tujuan</button>
+                    <button onclick="showSection('pemantik', this)" class="nav-btn px-3.5 py-1.5 rounded-full text-sm">🔥 Studi Kasus</button>
+                    <button onclick="showSection('data', this)" class="nav-btn px-3.5 py-1.5 rounded-full text-sm">A. Data</button>
+                    <button onclick="showSection('struktur', this)" class="nav-btn px-3.5 py-1.5 rounded-full text-sm">B. Struktur</button>
+                    <button onclick="showSection('array', this)" class="nav-btn px-3.5 py-1.5 rounded-full text-sm">C. Array</button>
+                    <button onclick="showSection('stack', this)" class="nav-btn px-3.5 py-1.5 rounded-full text-sm">D. Stack</button>
+                    <button onclick="showSection('queue', this)" class="nav-btn px-3.5 py-1.5 rounded-full text-sm">E. Queue</button>
+                    <button onclick="showSection('rangkuman', this)" class="nav-btn px-3.5 py-1.5 rounded-full text-sm">F. Rangkuman</button>
+                </nav>
+            </div>
+        </header>
+
+        <!-- ZOOM CONTROLS -->
+        <div class="zoom-controls" role="group" aria-label="Kontrol Zoom">
+            <button onclick="zoomIn()" class="zoom-btn" title="Perbesar"><i class="fas fa-plus"></i></button>
+            <div class="zoom-level" id="zoomLevel">100%</div>
+            <button onclick="zoomOut()" class="zoom-btn" title="Perkecil"><i class="fas fa-minus"></i></button>
+            <button onclick="resetZoom()" class="zoom-btn" title="Reset ke 100%"><i class="fas fa-undo"></i></button>
+        </div>
+
+        <div id="zoomWrapper" class="flex-grow">
+        <main class="w-full max-w-5xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
+
+            <!-- TUJUAN (Dipindah ke atas & aktif secara default) -->
+            <section id="tujuan" class="section-content active">
+                <div class="glass-card p-6 sm:p-10 mb-8 border-t-8 border-blueBright">
+                    <div class="flex justify-between items-start mb-6 border-b-2 border-slate-100 pb-4">
+                        <div class="flex items-center gap-3">
+                            <div class="bg-blue-100 text-blueBright p-3 rounded-xl shadow-sm"><i class="fas fa-bullseye text-2xl"></i></div>
+                            <h2 class="font-heading font-bold text-3xl text-blueDark">Tujuan Pembelajaran</h2>
+                        </div>
+                        <button onclick="playAudio('text-tujuan', event)" class="btn-secondary px-4 py-2 rounded-xl flex items-center gap-2 text-sm"><i class="fas fa-volume-up"></i> <span class="hidden sm:inline">Dengarkan</span></button>
+                    </div>
+                    <div id="text-tujuan" class="space-y-6">
+                        <p class="text-lg text-slate-700 leading-relaxed font-semibold">Setelah mengikuti pembelajaran ini, murid diharapkan mampu:</p>
+                        <div class="grid grid-cols-1 gap-4">
+                            <div class="bg-white border-2 border-slate-100 p-5 rounded-2xl flex items-start gap-4 shadow-sm hover:border-blueBright transition-colors">
+                                <div class="bg-blueBright text-white w-8 h-8 rounded-full flex items-center justify-center shrink-0 font-bold text-sm shadow-md">1</div>
+                                <p class="text-slate-700 leading-relaxed text-justify">Menjelaskan pengertian struktur data dan manfaatnya setelah mengamati video dan menyimak pemaparan materi dengan tepat. <span class="inline-block ml-2 text-xs bg-blue-100 text-blueBright font-bold px-2 py-1 rounded">C2</span></p>
+                            </div>
+                            <div class="bg-white border-2 border-slate-100 p-5 rounded-2xl flex items-start gap-4 shadow-sm hover:border-blueBright transition-colors">
+                                <div class="bg-yellowBright text-slate-800 w-8 h-8 rounded-full flex items-center justify-center shrink-0 font-bold text-sm shadow-md">2</div>
+                                <p class="text-slate-700 leading-relaxed text-justify">Mengidentifikasi karakteristik dan perbedaan Array, Stack, dan Queue melalui pengamatan contoh kasus kehidupan sehari-hari. <span class="inline-block ml-2 text-xs bg-yellow-100 text-yellowDark font-bold px-2 py-1 rounded">C2</span></p>
+                            </div>
+                            <div class="bg-white border-2 border-slate-100 p-5 rounded-2xl flex items-start gap-4 shadow-sm hover:border-blueBright transition-colors">
+                                <div class="bg-rose-500 text-white w-8 h-8 rounded-full flex items-center justify-center shrink-0 font-bold text-sm shadow-md">3</div>
+                                <p class="text-slate-700 leading-relaxed text-justify">Menganalisis penerapan Array, Stack, dan Queue dalam kehidupan sehari-hari melalui studi kasus dengan tepat disertai alasan yang logis. <span class="inline-block ml-2 text-xs bg-rose-100 text-rose-600 font-bold px-2 py-1 rounded">C4</span></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- STUDI KASUS -->
+            <section id="pemantik" class="section-content">
+                <div class="glass-card p-6 sm:p-10 mb-8 border-t-8 border-yellowBright">
+                    <div class="flex justify-between items-start mb-6 border-b-2 border-slate-100 pb-4">
+                        <div class="flex items-center gap-3">
+                            <div class="bg-yellow-100 text-yellowDark p-3 rounded-xl shadow-sm"><i class="fas fa-search text-2xl"></i></div>
+                            <h2 class="font-heading font-bold text-3xl text-blueDark">Studi Kasus</h2>
+                        </div>
+                    </div>
+                    <div class="space-y-6">
+                        <div class="bg-[#FFF8E1] border-2 border-[#FFE082] p-6 rounded-2xl shadow-sm">
+                            <p class="text-lg text-slate-700 leading-relaxed text-justify mb-4">Sebelum masuk ke materi inti, mari amati dua masalah sehari-hari berikut. Pernahkah kalian kebingungan saat <strong>mendata pesanan baju</strong> teman sekelas karena catatannya berantakan? Atau pusing saat harus <strong>mencari satu nama</strong> di antara ribuan daftar nama yang diacak?</p>
+                            <p class="text-lg text-slate-700 leading-relaxed text-justify">Bayangkan jika kalian memiliki tumpukan kertas berisi data nilai siswa, lalu diminta mencari nilai "Budi". Jika kertasnya diacak, kalian harus memeriksa satu per satu dari atas ke bawah. Ini memakan waktu lama dan melelahkan. Berbeda jika data tersebut disusun rapi sesuai abjad atau nomor absen, kalian bisa langsung menuju tempat yang tepat.</p>
+                        </div>
+                        
+                        <!-- Video Berjejer Kiri Kanan (Google Drive) -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                            <div>
+                                <h3 class="font-heading font-bold text-blueDark text-lg mb-2 flex items-center gap-2"><i class="fas fa-tshirt text-yellowDark"></i> Kasus 1: Mendata Pesanan</h3>
+                                <div class="video-wrapper aspect-[4/3]">
+                                    <iframe src="https://drive.google.com/file/d/12Op5AfjUQBPQZtwaWPq9S47s4R9P1JvS/preview" class="w-full h-full border-0" allow="autoplay; fullscreen" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>
+                                </div>
+                                <p class="text-xs text-slate-500 mt-2 text-center">Jika video tidak muncul, <a href="https://drive.google.com/file/d/12Op5AfjUQBPQZtwaWPq9S47s4R9P1JvS/view" target="_blank" class="text-blueBrand underline font-bold">buka di tab baru</a>.</p>
+                            </div>
+                            <div>
+                                <h3 class="font-heading font-bold text-blueDark text-lg mb-2 flex items-center gap-2"><i class="fas fa-search text-yellowDark"></i> Kasus 2: Mencari Data</h3>
+                                <div class="video-wrapper aspect-[4/3]">
+                                    <iframe src="https://drive.google.com/file/d/1ubrsepqyt8Frt1TX07ctw0v2pviOvXPN/preview" class="w-full h-full border-0" allow="autoplay; fullscreen" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>
+                                </div>
+                                <p class="text-xs text-slate-500 mt-2 text-center">Jika video tidak muncul, <a href="https://drive.google.com/file/d/1ubrsepqyt8Frt1TX07ctw0v2pviOvXPN/view" target="_blank" class="text-blueBrand underline font-bold">buka di tab baru</a>.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-[#E3F2FD] border-l-4 border-blueBright p-5 rounded-r-2xl mt-6 shadow-sm">
+                            <p class="text-slate-700 text-base flex items-start gap-3 text-justify"><i class="fas fa-quote-left text-blueBright mt-1 text-xl"></i>
+                                <span>Kekacauan pada kedua video tersebut dapat diatasi jika kita menyusun data dengan aturan tertentu. Inilah mengapa kita perlu mempelajari <strong class="text-blueDark">Struktur Data</strong>. Dengan struktur data yang tepat, komputer dapat memproses informasi jauh lebih cepat dan efisien.</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- DATA -->
+            <section id="data" class="section-content">
+                <div class="glass-card p-6 sm:p-10 border-t-8 border-yellowBright">
+                    <div class="flex justify-between items-start mb-6 border-b-2 border-slate-100 pb-4">
+                        <h2 class="font-heading font-bold text-3xl text-blueDark">A. Pengertian Data</h2>
+                        <button onclick="playAudio('text-data', event)" class="btn-secondary px-4 py-2 rounded-xl flex items-center gap-2 text-sm"><i class="fas fa-volume-up"></i> <span class="hidden sm:inline">Dengarkan</span></button>
+                    </div>
+                    <div class="space-y-6" id="text-data">
+                        <p class="text-lg text-slate-700 leading-relaxed text-justify"><strong>Data</strong> adalah sekumpulan fakta, angka, simbol, atau keterangan mentah yang belum memiliki makna bagi penerimanya. Data bisa berupa apa saja yang kita temui sehari-hari: daftar nama siswa, suhu ruangan, jumlah pengunjung, teks pesan di WhatsApp, hingga gambar dan suara. Pada dasarnya, data adalah "bahan baku" informasi.</p>
+                        
+                        <p class="text-lg text-slate-700 leading-relaxed text-justify">Agar data dapat bermanfaat, ia harus diolah terlebih dahulu. Proses pengolahan ini mengubah data mentah menjadi <strong>Informasi</strong>, yaitu data yang sudah terorganisir dan memiliki makna. Contohnya, angka-angka nilai ulangan murid (data mentah) jika diolah dan dirata-rata akan menghasilkan informasi "Rata-rata nilai kelas adalah 85". Informasi inilah yang kemudian digunakan oleh guru untuk mengambil keputusan.</p>
+                        
+                        <div class="mt-6 bg-white border-2 border-slate-100 rounded-2xl p-8 shadow-sm max-w-2xl mx-auto">
+                            <h3 class="font-heading text-xl font-bold mb-6 text-center border-b-2 border-slate-100 pb-3 text-blueDark">Alur Pemrosesan Data</h3>
+                            <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+                                <div class="text-center p-4 bg-[#E3F2FD] rounded-xl w-full border-2 border-[#90CAF9] shadow-sm">
+                                    <i class="fas fa-database text-4xl mb-2 text-blueBright"></i>
+                                    <p class="font-bold text-slate-700">Data Mentah</p>
+                                </div>
+                                <i class="fas fa-chevron-right text-2xl hidden sm:block text-slate-400"></i>
+                                <i class="fas fa-chevron-down text-2xl sm:hidden text-slate-400"></i>
+                                <div class="text-center p-4 bg-[#E3F2FD] rounded-xl w-full border-2 border-[#90CAF9] shadow-sm">
+                                    <i class="fas fa-cogs text-4xl mb-2 text-blueBright"></i>
+                                    <p class="font-bold text-slate-700">Diproses</p>
+                                </div>
+                                <i class="fas fa-chevron-right text-2xl hidden sm:block text-slate-400"></i>
+                                <i class="fas fa-chevron-down text-2xl sm:hidden text-slate-400"></i>
+                                <div class="text-center p-4 bg-[#FFF8E1] rounded-xl w-full border-2 border-[#FFE082] shadow-sm">
+                                    <i class="fas fa-lightbulb text-4xl mb-2 text-yellowDark animate-pulse"></i>
+                                    <p class="font-bold text-slate-700">Informasi</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- STRUKTUR -->
+            <section id="struktur" class="section-content">
+                <div class="glass-card p-6 sm:p-10 border-t-8 border-blueBright">
+                    <div class="flex justify-between items-start mb-6 border-b-2 border-slate-100 pb-4">
+                        <h2 class="font-heading font-bold text-3xl text-blueDark">B. Pengertian Struktur Data</h2>
+                        <button onclick="playAudio('text-struktur', event)" class="btn-secondary px-4 py-2 rounded-xl flex items-center gap-2 text-sm"><i class="fas fa-volume-up"></i> <span class="hidden sm:inline">Dengarkan</span></button>
+                    </div>
+                    
+                    <div id="text-struktur" class="space-y-6">
+                        <p class="text-lg text-slate-700 leading-relaxed text-justify"><strong>Struktur data</strong> adalah cara khusus untuk menyimpan, mengatur, dan mengelola data di dalam memori komputer. Bayangkan memori komputer sebagai loker raksasa dengan ribuan kotak. Struktur data adalah aturan atau strategi bagaimana kita meletakkan barang (data) ke dalam loker-loker tersebut agar ketika dibutuhkan, kita bisa mengambilnya dengan sangat cepat dan efisien.</p>
+                        
+                        <p class="text-lg text-slate-700 leading-relaxed text-justify">Tanpa struktur data yang baik, data di dalam komputer akan seperti tumpukan buku di gudang yang tidak beraturan. Menemukan satu buku spesifik akan sangat sulit dan memakan waktu. Sebaliknya, dengan struktur data yang tepat, data tersusun rapi sehingga proses pencarian, penambahan, atau penghapusan data dapat dilakukan dalam hitungan milidetik.</p>
+
+                        <!-- GAMBAR 1 -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 my-8">
+                            <div class="bg-rose-50 rounded-2xl p-6 border-2 border-rose-200 flex flex-col items-center text-center shadow-sm">
+                                <div class="absolute -right-4 -top-4 w-16 h-16 bg-rose-200 rounded-full opacity-50"></div>
+                                <div class="text-rose-500 mb-3 relative z-10"><i class="fas fa-times-circle text-4xl bg-white rounded-full"></i></div>
+                                <h4 class="font-bold text-rose-800 mb-4 text-lg relative z-10">Tanpa Struktur Data</h4>
+                                <div class="relative w-full h-32 flex items-center justify-center bg-white rounded-xl border border-rose-100 shadow-inner mb-4">
+                                    <i class="fas fa-file-alt text-slate-300 text-4xl absolute top-2 left-6 transform rotate-12"></i>
+                                    <i class="fas fa-folder text-slate-300 text-4xl absolute bottom-2 left-10 transform -rotate-12"></i>
+                                    <i class="fas fa-file-image text-slate-300 text-4xl absolute top-8 right-8 transform rotate-45"></i>
+                                    <i class="fas fa-file-pdf text-slate-300 text-4xl absolute bottom-4 right-16"></i>
+                                    <div class="bg-rose-100 text-rose-600 p-2 rounded-full absolute z-10 shadow-md">
+                                        <i class="fas fa-search text-xl animate-bounce"></i>
+                                    </div>
+                                </div>
+                                <p class="text-sm text-rose-700 font-medium relative z-10">Data berantakan. Sulit dan lama saat mencari informasi spesifik.</p>
+                            </div>
+                            
+                            <div class="bg-emerald-50 rounded-2xl p-6 border-2 border-emerald-200 flex flex-col items-center text-center shadow-sm">
+                                <div class="absolute -right-4 -top-4 w-16 h-16 bg-emerald-200 rounded-full opacity-50"></div>
+                                <div class="text-emerald-500 mb-3 relative z-10"><i class="fas fa-check-circle text-4xl bg-white rounded-full"></i></div>
+                                <h4 class="font-bold text-emerald-800 mb-4 text-lg relative z-10">Dengan Struktur Data</h4>
+                                <div class="relative w-full h-32 flex items-center justify-center gap-3 bg-white rounded-xl border border-emerald-100 shadow-inner mb-4">
+                                    <div class="w-12 h-14 bg-emerald-100 border-2 border-emerald-300 rounded flex items-center justify-center"><i class="fas fa-folder text-emerald-500 text-2xl"></i></div>
+                                    <div class="w-12 h-14 bg-emerald-100 border-2 border-emerald-300 rounded flex items-center justify-center"><i class="fas fa-folder text-emerald-500 text-2xl"></i></div>
+                                    <div class="w-14 h-16 bg-emerald-500 border-2 border-emerald-600 rounded flex items-center justify-center transform scale-110 shadow-lg relative">
+                                        <i class="fas fa-folder-open text-white text-3xl"></i>
+                                        <div class="absolute -top-2 -right-2 bg-yellow-400 text-slate-900 text-xs font-bold w-6 h-6 rounded-full flex items-center justify-center animate-pulse"><i class="fas fa-star"></i></div>
+                                    </div>
+                                </div>
+                                <p class="text-sm text-emerald-700 font-medium relative z-10">Data terorganisir rapi. Pencarian dan pengolahan data sangat cepat.</p>
+                            </div>
+                        </div>
+
+                        <!-- GAMBAR 2 -->
+                        <h3 class="font-heading font-bold text-xl text-blueDark mt-8">Mengapa Data Perlu Disusun?</h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div class="bg-white border-2 border-slate-100 shadow-sm p-4 rounded-xl flex items-start gap-4">
+                                <div class="bg-blue-100 text-blue-600 w-8 h-8 rounded-full flex items-center justify-center shrink-0 font-bold">1</div>
+                                <p class="text-slate-600">Memudahkan pencarian dan pengambilan data ketika dibutuhkan.</p>
+                            </div>
+                            <div class="bg-white border-2 border-slate-100 shadow-sm p-4 rounded-xl flex items-start gap-4">
+                                <div class="bg-blue-100 text-blue-600 w-8 h-8 rounded-full flex items-center justify-center shrink-0 font-bold">2</div>
+                                <p class="text-slate-600">Membuat proses pengolahan data menjadi lebih cepat dan teratur.</p>
+                            </div>
+                            <div class="bg-white border-2 border-slate-100 shadow-sm p-4 rounded-xl flex items-start gap-4">
+                                <div class="bg-blue-100 text-blue-600 w-8 h-8 rounded-full flex items-center justify-center shrink-0 font-bold">3</div>
+                                <p class="text-slate-600">Mencegah kekacauan atau kehilangan data akibat penyimpanan tidak beraturan.</p>
+                            </div>
+                            <div class="bg-white border-2 border-slate-100 shadow-sm p-4 rounded-xl flex items-start gap-4">
+                                <div class="bg-blue-100 text-blue-600 w-8 h-8 rounded-full flex items-center justify-center shrink-0 font-bold">4</div>
+                                <p class="text-slate-600">Menyesuaikan cara penyimpanan dengan kebutuhan pemrosesan (antrean/tumpukan).</p>
+                            </div>
+                        </div>
+
+                        <div class="bg-slate-50 p-5 rounded-xl mt-6 border border-slate-200">
+                            <h4 class="font-bold text-slate-700 mb-2">Contoh Sehari-hari:</h4>
+                            <ul class="list-disc list-inside text-slate-600 space-y-1">
+                                <li>Rak buku di perpustakaan yang disusun berdasarkan nomor</li>
+                                <li>Loker siswa yang diberi nomor</li>
+                                <li>Daftar hadir berdasarkan nomor absen</li>
+                                <li>Folder foto di HP berdasarkan album</li>
+                            </ul>
+                        </div>
+
+                        <!-- Video Struktur Data (Lokal) -->
+                        <div class="video-wrapper aspect-video mt-8">
+                            <video controls>
+                                <source src="Struktur Data.mp4" type="video/mp4">
+                                Browser Anda tidak mendukung pemutar video.
+                            </video>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ARRAY -->
+            <section id="array" class="section-content">
+                <div class="glass-card p-6 sm:p-10 mb-8 border-t-8 border-blueBright">
+                    <div class="flex justify-between items-start mb-6 border-b-2 border-slate-100 pb-4">
+                        <h2 class="font-heading font-bold text-3xl text-blueDark">C. Array / List</h2>
+                        <button onclick="playAudio('text-array', event)" class="btn-secondary px-4 py-2 rounded-xl flex items-center gap-2 text-sm"><i class="fas fa-volume-up"></i> <span class="hidden sm:inline">Dengarkan</span></button>
+                    </div>
+                    <div id="text-array" class="space-y-6">
+                        <p class="text-lg text-slate-700 leading-relaxed text-justify"><strong>Array</strong> (atau sering disebut List) adalah struktur data yang paling dasar. Array menyimpan sekumpulan data yang <strong>sejenis</strong> di dalam satu wadah secara <strong>berurutan</strong>. Setiap elemen data memiliki posisi yang disebut <strong>indeks</strong>.</p>
+                        
+                        <p class="text-lg text-slate-700 leading-relaxed text-justify">Dalam ilmu komputer, indeks array umumnya dimulai dari angka <strong>0</strong>, bukan 1. Keunggulan utama Array adalah kemampuannya mengakses data secara langsung (<em>Random Access</em>). Jika ingin mengambil data di indeks ke-3, komputer tidak perlu membaca indeks 0, 1, dan 2 terlebih dahulu.</p>
+
+                        <!-- GAMBAR 3 -->
+                        <div class="my-6 bg-gradient-to-r from-indigo-50 to-blue-50 rounded-2xl p-6 border border-indigo-100 shadow-sm">
+                            <div class="flex items-center gap-3 mb-4 justify-center">
+                                <i class="fas fa-boxes text-indigo-500 text-2xl"></i>
+                                <h4 class="font-bold text-indigo-900 text-lg">Visualisasi Array</h4>
+                            </div>
+                            <div class="flex overflow-x-auto pb-4 justify-center gap-2 md:gap-4 px-2">
+                                <div class="flex flex-col items-center group">
+                                    <div class="w-14 h-16 sm:w-20 sm:h-24 bg-white border-2 border-indigo-300 rounded-t-xl flex flex-col items-center justify-center shadow-sm group-hover:bg-indigo-100 transition-colors relative">
+                                        <i class="fas fa-apple-alt text-red-500 text-2xl sm:text-3xl"></i>
+                                        <span class="text-[10px] sm:text-xs font-bold text-slate-500 mt-1">Apel</span>
+                                    </div>
+                                    <div class="w-14 sm:w-20 py-1.5 bg-slate-800 text-white text-xs text-center rounded-b-xl font-mono font-bold shadow-md">Idx: 0</div>
+                                </div>
+                                <div class="flex flex-col items-center group">
+                                    <div class="w-14 h-16 sm:w-20 sm:h-24 bg-white border-2 border-indigo-300 rounded-t-xl flex flex-col items-center justify-center shadow-sm group-hover:bg-indigo-100 transition-colors relative">
+                                        <i class="fas fa-lemon text-yellow-500 text-2xl sm:text-3xl"></i>
+                                        <span class="text-[10px] sm:text-xs font-bold text-slate-500 mt-1">Lemon</span>
+                                    </div>
+                                    <div class="w-14 sm:w-20 py-1.5 bg-slate-800 text-white text-xs text-center rounded-b-xl font-mono font-bold shadow-md">Idx: 1</div>
+                                </div>
+                                <div class="flex flex-col items-center group">
+                                    <div class="w-14 h-16 sm:w-20 sm:h-24 bg-indigo-500 border-2 border-indigo-600 rounded-t-xl flex flex-col items-center justify-center shadow-lg transform scale-110 z-10 relative">
+                                        <i class="fas fa-carrot text-orange-400 text-2xl sm:text-3xl"></i>
+                                        <span class="text-[10px] sm:text-xs font-bold text-indigo-100 mt-1">Wortel</span>
+                                        <div class="absolute -top-3 -right-3 bg-yellow-400 text-slate-900 text-[10px] px-2 py-0.5 rounded-full font-bold shadow-sm animate-bounce">Diakses!</div>
+                                    </div>
+                                    <div class="w-14 sm:w-20 py-1.5 bg-indigo-900 text-white text-xs text-center rounded-b-xl font-mono font-bold shadow-lg transform scale-110 z-10">Idx: 2</div>
+                                </div>
+                                <div class="flex flex-col items-center group">
+                                    <div class="w-14 h-16 sm:w-20 sm:h-24 bg-white border-2 border-indigo-300 rounded-t-xl flex flex-col items-center justify-center shadow-sm group-hover:bg-indigo-100 transition-colors relative">
+                                        <i class="fas fa-pepper-hot text-red-600 text-2xl sm:text-3xl"></i>
+                                        <span class="text-[10px] sm:text-xs font-bold text-slate-500 mt-1">Cabai</span>
+                                    </div>
+                                    <div class="w-14 sm:w-20 py-1.5 bg-slate-800 text-white text-xs text-center rounded-b-xl font-mono font-bold shadow-md">Idx: 3</div>
+                                </div>
+                            </div>
+                            <p class="text-center text-sm text-indigo-700 mt-4 bg-white/50 py-2 px-4 rounded-lg inline-block w-full"><i class="fas fa-info-circle mr-1"></i> Data disimpan berderet. Untuk mengambil "Wortel", komputer langsung melompat ke <strong>Indeks 2</strong> tanpa mengecek indeks 0 dan 1.</p>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="bg-indigo-50 border-l-4 border-indigo-500 p-4 rounded-r-xl">
+                                <h4 class="font-bold text-indigo-800 flex items-center gap-2"><i class="fas fa-lightbulb"></i> Analogi</h4>
+                                <p class="text-indigo-900 mt-2">Array seperti rak buku bernomor. Setiap buku punya nomor rak tetap. Mau cari buku di rak ke-5? Langsung ke sana tanpa memeriksa rak lain!</p>
+                            </div>
+                            <div class="bg-white border border-slate-200 p-4 rounded-xl shadow-sm">
+                                <h4 class="font-bold text-slate-800 mb-2 flex items-center gap-2"><i class="fas fa-code text-indigo-600"></i> Di Dunia Nyata:</h4>
+                                <ul class="text-sm text-slate-600 space-y-1 list-disc list-inside">
+                                    <li>Daftar nilai siswa (nilai[0], nilai[1], dst.)</li>
+                                    <li>Matriks pada game (peta, sprite)</li>
+                                    <li>Buffer pada pemutar video</li>
+                                    <li>Tabel database sederhana</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <h3 class="font-bold text-lg text-slate-800 mt-4">Ciri-ciri Array/List:</h3>
+                        <ul class="list-none space-y-2 text-slate-600">
+                            <li class="flex items-center gap-2"><i class="fas fa-check-circle text-green-500"></i> Data disimpan berurutan dan memiliki posisi/indeks yang tetap.</li>
+                            <li class="flex items-center gap-2"><i class="fas fa-check-circle text-green-500"></i> Setiap data dapat diakses langsung melalui indeksnya.</li>
+                            <li class="flex items-center gap-2"><i class="fas fa-check-circle text-green-500"></i> Umumnya berisi data yang bertipe sejenis.</li>
+                        </ul>
+
+                        <!-- Video Array (Lokal) -->
+                        <div class="video-wrapper aspect-video mt-4">
+                            <video controls>
+                                <source src="Array.mp4" type="video/mp4">
+                                Browser Anda tidak mendukung pemutar video.
+                            </video>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SIMULASI SEDERHANA: ARRAY -->
+                <div class="glass-card p-6 sm:p-10 border-t-8 border-yellowBright mb-8">
+                    <h3 class="font-heading font-bold text-2xl text-blueDark mb-2"><i class="fas fa-gamepad text-yellowDark mr-2"></i> Simulasi 1: Array Sederhana</h3>
+                    <p class="text-slate-500 mb-6 text-justify">Ketik data ke dalam kotak berdasarkan indeks-nya. Perhatikan bagaimana setiap data punya posisi tetap.</p>
+                    <div class="bg-white p-6 rounded-2xl border-2 border-slate-100 overflow-x-auto shadow-inner">
+                        <div class="flex gap-2 min-w-max pb-4 justify-center" id="array-container"></div>
+                    </div>
+                    <div class="mt-6 flex flex-wrap gap-4 items-end bg-slate-50 p-5 rounded-2xl border-2 border-slate-100">
+                        <div class="flex-1 min-w-[150px]">
+                            <label class="block text-sm font-bold text-slate-700 mb-1">Pilih Indeks (0-6):</label>
+                            <select id="arrayIndex" class="w-full bg-white border-2 border-slate-300 rounded-lg p-2.5 text-slate-800 outline-none focus:border-blueBright">
+                                <option value="0">Indeks 0</option><option value="1">Indeks 1</option><option value="2">Indeks 2</option>
+                                <option value="3">Indeks 3</option><option value="4">Indeks 4</option><option value="5">Indeks 5</option><option value="6">Indeks 6</option>
+                            </select>
+                        </div>
+                        <div class="flex-1 min-w-[150px]">
+                            <label class="block text-sm font-bold text-slate-700 mb-1">Masukkan Data:</label>
+                            <input type="text" id="arrayValue" placeholder="Misal: Apel" class="w-full bg-white border-2 border-slate-300 rounded-lg p-2.5 text-slate-800 outline-none focus:border-blueBright">
+                        </div>
+                        <button onclick="updateArray()" class="btn-primary py-2.5 px-6 rounded-lg flex items-center gap-2 text-sm"><i class="fas fa-save"></i> Simpan Array</button>
+                    </div>
+                </div>
+
+                <!-- SIMULASI CPU+RAM: ARRAY (Excel) -->
+                <div class="glass-card p-6 sm:p-10 border-t-8 border-yellowBright">
+                    <div class="flex items-start gap-3 mb-4">
+                        <div class="bg-yellow-100 text-yellowDark p-3 rounded-xl shadow-sm"><i class="fas fa-microchip text-2xl"></i></div>
+                        <div>
+                            <h3 class="font-heading font-bold text-2xl text-blueDark">Simulasi 2: Array di CPU & RAM (contoh: Excel)</h3>
+                            <p class="text-slate-500 mt-1 text-justify">Kalian pasti tahu <strong>Microsoft Excel</strong>! Saat kalian klik sel B2, Excel langsung tahu nilainya tanpa membaca sel lain.</p>
+                        </div>
+                    </div>
+
+                    <!-- Cara baca simulator -->
+                    <div class="bg-[#E3F2FD] border-2 border-[#90CAF9] p-5 rounded-2xl mb-6 shadow-sm">
+                        <h4 class="font-heading font-bold text-blueDark text-sm mb-2"><i class="fas fa-book-open text-blueBright"></i> Cara baca simulator di bawah:</h4>
+                        <ul class="text-xs text-slate-700 space-y-1.5 list-disc list-inside font-semibold">
+                            <li>🧠 Kotak <strong>kiri</strong> (biru) = <strong>CPU</strong> — "otak" komputer. Yang mengerjakan perintah.</li>
+                            <li>💾 Kotak <strong>kanan</strong> (abu-abu) = <strong>RAM</strong> — "meja kerja" komputer. Menyimpan data sementara.</li>
+                            <li>Panah ↔ di tengah = <strong>jalan data</strong>. Kalau menyala, data sedang mengalir.</li>
+                            <li>Kotak RAM yang <strong>menyala kuning</strong> = data yang sedang diambil CPU.</li>
+                            <li>Panel di bawah = <strong>narasi langkah demi langkah</strong>. Baca dengan saksama.</li>
+                        </ul>
+                    </div>
+
+                    <!-- Excel example -->
+                    <div class="bg-white rounded-2xl p-6 border-2 border-slate-100 mb-6 shadow-sm">
+                        <p class="text-sm font-bold text-slate-700 mb-4"><i class="fas fa-table mr-2 text-yellowDark"></i> <strong>Langkah 1:</strong> Klik salah satu sel di "Excel" di bawah ini</p>
+                        <div class="overflow-x-auto">
+                            <div class="excel-sheet inline-block">
+                                <table>
+                                    <thead><tr><th></th><th>A</th><th>B</th></tr></thead>
+                                    <tbody>
+                                        <tr><th>1</th><td data-excel-idx="0" onclick="excelClick(0)">Nama</td><td data-excel-idx="1" onclick="excelClick(1)">Nilai</td></tr>
+                                        <tr><th>2</th><td data-excel-idx="2" onclick="excelClick(2)">Ani</td><td data-excel-idx="3" onclick="excelClick(3)">85</td></tr>
+                                        <tr><th>3</th><td data-excel-idx="4" onclick="excelClick(4)">Budi</td><td data-excel-idx="5" onclick="excelClick(5)">92</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- CPU + RAM -->
+                    <p class="text-sm font-bold text-slate-700 mb-2"><i class="fas fa-memory mr-2 text-yellowDark"></i> <strong>Langkah 2:</strong> Ini yang terjadi di dalam komputer</p>
+                    <div class="cpu-ram-scene">
+                        <div class="cpu-unit" id="cpu-array">
+                            <div class="chip">🧠</div>
+                            <div class="label">CPU</div>
+                            <div class="cpu-sub">Otak Komputer</div>
+                            <div class="status" id="cpu-array-status">Idle</div>
+                        </div>
+                        <div class="data-bus">
+                            <div class="bus-arrow" id="bus-array-to-ram">→</div>
+                            <div class="bus-arrow" id="bus-array-to-cpu">←</div>
+                        </div>
+                        <div class="ram-unit">
+                            <div class="ram-header"><i class="fas fa-server"></i> RAM — Meja Kerja</div>
+                            <div class="ram-sub">Data sementara yang sedang dipakai</div>
+                            <div class="ram-grid" id="ram-array-grid">
+                                <div class="ram-cell" id="ram-array-cell-0"><div class="addr">Sel 1</div><div class="val">Nama</div></div>
+                                <div class="ram-cell" id="ram-array-cell-1"><div class="addr">Sel 2</div><div class="val">Nilai</div></div>
+                                <div class="ram-cell" id="ram-array-cell-2"><div class="addr">Sel 3</div><div class="val">Ani</div></div>
+                                <div class="ram-cell" id="ram-array-cell-3"><div class="addr">Sel 4</div><div class="val">85</div></div>
+                                <div class="ram-cell" id="ram-array-cell-4"><div class="addr">Sel 5</div><div class="val">Budi</div></div>
+                                <div class="ram-cell" id="ram-array-cell-5"><div class="addr">Sel 6</div><div class="val">92</div></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="instruction-panel" id="inst-array">
+                        <span class="step-badge">INFO</span>
+                        <span>Klik salah satu sel Excel di atas untuk melihat perjalanan data dari CPU ke RAM dan kembali.</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- STACK -->
+            <section id="stack" class="section-content">
+                <div class="glass-card p-6 sm:p-10 mb-8 border-t-8 border-blueBright">
+                    <div class="flex justify-between items-start mb-6 border-b-2 border-slate-100 pb-4">
+                        <h2 class="font-heading font-bold text-3xl text-blueDark">D. Stack (Tumpukan)</h2>
+                        <button onclick="playAudio('text-stack', event)" class="btn-secondary px-4 py-2 rounded-xl flex items-center gap-2 text-sm"><i class="fas fa-volume-up"></i> <span class="hidden sm:inline">Dengarkan</span></button>
+                    </div>
+                    <div id="text-stack" class="space-y-6">
+                        <p class="text-lg text-slate-700 leading-relaxed text-justify"><strong>Stack</strong> atau tumpukan adalah struktur data yang sangat ketat aturannya. Stack menganut prinsip <strong>LIFO (Last In First Out)</strong>, yang berarti "Yang Terakhir Masuk, Dia Yang Pertama Keluar". Bayangkan kalian menumpuk piring kotor di wastafel. Piring yang paling akhir kalian letakkan di posisi paling atas, dan ketika kalian ingin mencucinya, piring paling atas itulah yang pertama kali diambil.</p>
+                        
+                        <p class="text-lg text-slate-700 leading-relaxed text-justify">Di dalam Stack, kita hanya bisa menambah data di bagian paling atas (disebut operasi <strong>PUSH</strong>) dan mengambil data dari bagian paling atas juga (disebut operasi <strong>POP</strong>). Kita tidak bisa seenaknya mengambil data di tengah atau di bawah tanpa mengambil data di atasnya terlebih dahulu.</p>
+
+                        <!-- GAMBAR 4 -->
+                        <div class="my-6 bg-gradient-to-br from-rose-50 to-pink-50 rounded-2xl p-6 md:p-8 border border-rose-100 shadow-sm flex flex-col md:flex-row items-center gap-8 justify-center">
+                            <div class="text-center md:text-left flex-1">
+                                <span class="bg-rose-600 text-white px-3 py-1 rounded-full text-sm font-bold tracking-wider mb-3 inline-block shadow-sm">KONSEP LIFO</span>
+                                <h4 class="font-bold text-rose-900 text-2xl mb-2">Last In, First Out</h4>
+                                <p class="text-rose-700 mb-4">Bayangkan sebuah tabung silinder vertikal. Data hanya bisa masuk dari atas (PUSH) dan keluar dari atas (POP).</p>
+                                <div class="flex gap-4 justify-center md:justify-start">
+                                    <div class="bg-white p-3 rounded-xl shadow-sm border border-rose-100 flex items-center gap-3">
+                                        <div class="w-10 h-10 bg-green-100 text-green-600 rounded-full flex items-center justify-center text-xl"><i class="fas fa-arrow-down"></i></div>
+                                        <div class="text-left"><p class="font-bold text-slate-800 text-sm">PUSH</p><p class="text-xs text-slate-500">Masuk Atas</p></div>
+                                    </div>
+                                    <div class="bg-white p-3 rounded-xl shadow-sm border border-rose-100 flex items-center gap-3">
+                                        <div class="w-10 h-10 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xl"><i class="fas fa-arrow-up"></i></div>
+                                        <div class="text-left"><p class="font-bold text-slate-800 text-sm">POP</p><p class="text-xs text-slate-500">Keluar Atas</p></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="relative w-40 h-56 bg-white border-x-4 border-b-4 border-slate-700 rounded-b-2xl shadow-inner flex flex-col justify-end p-2 gap-1.5 shrink-0 mt-8 md:mt-0">
+                                <div class="absolute -top-12 left-1/2 transform -translate-x-1/2 flex gap-4">
+                                    <div class="flex flex-col items-center animate-bounce text-green-500">
+                                        <span class="text-xs font-bold mb-1">PUSH</span>
+                                        <i class="fas fa-long-arrow-alt-down text-2xl"></i>
+                                    </div>
+                                    <div class="flex flex-col items-center text-blue-500 transform -translate-y-2">
+                                        <i class="fas fa-long-arrow-alt-up text-2xl"></i>
+                                        <span class="text-xs font-bold mt-1">POP</span>
+                                    </div>
+                                </div>
+                                <div class="w-full h-12 bg-rose-300 rounded text-center text-rose-900 text-sm font-bold flex flex-col justify-center border-b-4 border-rose-400 relative">
+                                    <span class="absolute -left-16 text-xs text-slate-500 bg-white px-1 rounded shadow-sm border border-slate-100">Top <i class="fas fa-caret-right text-rose-500"></i></span>
+                                    Terakhir Masuk
+                                </div>
+                                <div class="w-full h-12 bg-rose-400 rounded text-center text-white text-sm font-bold flex items-center justify-center border-b-4 border-rose-500">Data 2</div>
+                                <div class="w-full h-12 bg-rose-500 rounded text-center text-white text-sm font-bold flex flex-col justify-center border-b-4 border-rose-600 relative">
+                                    <span class="absolute -left-16 text-xs text-slate-500 bg-white px-1 rounded shadow-sm border border-slate-100">Dasar <i class="fas fa-caret-right text-slate-400"></i></span>
+                                    Pertama Masuk
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-rose-50 border-l-4 border-rose-500 p-4 rounded-r-xl">
+                            <h4 class="font-bold text-rose-800 flex items-center gap-2"><i class="fas fa-lightbulb"></i> Analogi</h4>
+                            <p class="text-rose-900 mt-2">Stack seperti tumpukan piring di wastafel setelah makan. Piring yang terakhir diletakkan (paling atas) akan dicuci lebih dulu!</p>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                            <div class="bg-white p-5 border border-slate-100 rounded-xl shadow-sm">
+                                <h4 class="font-bold text-slate-800 mb-3 border-b pb-2 flex items-center gap-2"><i class="fas fa-list text-rose-500"></i> Contoh Sehari-hari</h4>
+                                <ul class="list-disc list-inside text-slate-600 space-y-2">
+                                    <li>Tumpukan piring kotor</li>
+                                    <li>Fitur Undo (Ctrl+Z) di aplikasi</li>
+                                    <li>Tumpukan baju di lemari</li>
+                                    <li>Tombol Back pada browser</li>
+                                </ul>
+                            </div>
+                            <div class="bg-white p-5 border border-slate-100 rounded-xl shadow-sm">
+                                <h4 class="font-bold text-slate-800 mb-3 border-b pb-2 flex items-center gap-2"><i class="fas fa-code text-rose-500"></i> Penerapan Programming</h4>
+                                <ul class="list-disc list-inside text-slate-600 space-y-2">
+                                    <li>Function call stack (pemanggilan fungsi)</li>
+                                    <li>Parsing ekspresi matematika</li>
+                                    <li>Algoritma backtracking (DFS)</li>
+                                    <li>Manajemen memori lokal</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Video Stack (Lokal) -->
+                        <div class="video-wrapper aspect-video mt-4">
+                            <video controls>
+                                <source src="Stack.mp4" type="video/mp4">
+                                Browser Anda tidak mendukung pemutar video.
+                            </video>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SIMULASI SEDERHANA: STACK -->
+                <div class="glass-card p-6 sm:p-10 border-t-8 border-yellowBright mb-8">
+                    <h3 class="font-heading font-bold text-2xl text-blueDark mb-2"><i class="fas fa-layer-group text-yellowDark mr-2"></i> Simulasi 1: Stack Sederhana</h3>
+                    <p class="text-slate-500 mb-6 text-justify">Coba PUSH untuk memasukkan data ke atas, dan POP untuk mengambil dari atas (LIFO).</p>
+                    <div class="flex flex-col md:flex-row gap-8">
+                        <div class="flex-1 space-y-4 bg-slate-50 p-6 rounded-2xl border-2 border-slate-100">
+                            <div>
+                                <label class="block text-sm font-bold text-slate-700 mb-1">Data untuk di-Push:</label>
+                                <input type="text" id="stackInput" placeholder="Masukkan angka/teks" class="w-full bg-white border-2 border-slate-300 rounded-lg p-3 text-slate-800 outline-none focus:border-blueBright">
+                            </div>
+                            <div class="flex gap-2">
+                                <button onclick="pushStack()" class="flex-1 bg-blueBright hover:bg-blue-600 text-white font-bold py-3 px-4 rounded-lg transition-colors flex justify-center items-center gap-2 shadow-[0_4px_0_#1565C0]"><i class="fas fa-arrow-down"></i> PUSH</button>
+                                <button onclick="popStack()" class="flex-1 bg-yellowBright hover:bg-yellow-500 text-slate-800 font-bold py-3 px-4 rounded-lg transition-colors flex justify-center items-center gap-2 shadow-[0_4px_0_#FF8F00]"><i class="fas fa-arrow-up"></i> POP</button>
+                            </div>
+                            <div class="mt-6 bg-white p-4 rounded-xl border-2 border-slate-100">
+                                <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Log Operasi & Hasil Pop:</h4>
+                                <ul id="stackLog" class="text-sm text-slate-700 font-mono space-y-1 h-32 overflow-y-auto">
+                                    <li class="text-slate-400 italic">Belum ada operasi.</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="w-full md:w-64 bg-white rounded-b-xl border-x-4 border-b-4 border-slate-300 relative min-h-[300px] flex flex-col justify-end p-2 pb-0 pt-10 shadow-inner">
+                            <div class="absolute -top-6 left-0 right-0 text-center text-slate-500 font-bold font-mono text-sm">Top / Atas</div>
+                            <div id="stack-visual-container" class="stack-container gap-1 w-full"></div>
+                            <div class="w-full h-3 bg-slate-400 mt-1 rounded-sm"></div>
+                            <div class="text-center text-xs text-slate-500 mt-2 mb-2 font-bold font-mono">Dasar Stack</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SIMULASI CPU+RAM: STACK (Undo/Redo) -->
+                <div class="glass-card p-6 sm:p-10 border-t-8 border-yellowBright">
+                    <div class="flex items-start gap-3 mb-4">
+                        <div class="bg-yellow-100 text-yellowDark p-3 rounded-xl shadow-sm"><i class="fas fa-microchip text-2xl"></i></div>
+                        <div>
+                            <h3 class="font-heading font-bold text-2xl text-blueDark">Simulasi 2: Stack di CPU & RAM (contoh: Undo/Redo)</h3>
+                            <p class="text-slate-500 mt-1 text-justify">Pernah pakai <strong>Ctrl+Z</strong> di Word atau Excel? Itu Stack bekerja! Setiap ketikan disimpan, saat Undo, data terakhir dibuang.</p>
+                        </div>
+                    </div>
+
+                    <!-- Cara baca simulator -->
+                    <div class="bg-[#E3F2FD] border-2 border-[#90CAF9] p-5 rounded-2xl mb-6 shadow-sm">
+                        <h4 class="font-heading font-bold text-blueDark text-sm mb-2"><i class="fas fa-book-open text-blueBright"></i> Cara baca simulator di bawah:</h4>
+                        <ul class="text-xs text-slate-700 space-y-1.5 list-disc list-inside font-semibold">
+                            <li>🧠 Kotak <strong>kiri</strong> (biru) = <strong>CPU</strong> — "otak" yang memproses perintah Undo/Redo.</li>
+                            <li>💾 Kotak <strong>kanan</strong> (abu-abu) = <strong>RAM</strong> — menyimpan Stack (lapisan demi lapisan).</li>
+                            <li>Panah ↔ di tengah = <strong>jalan data</strong>. Menyala = data sedang mengalir.</li>
+                            <li>Setiap kali kamu ketik teks → CPU menambah <strong>lapisan baru</strong> di RAM.</li>
+                            <li>Setiap kali kamu klik Undo → CPU membuang <strong>lapisan paling atas</strong>.</li>
+                            <li>Panel di bawah = <strong>narasi langkah demi langkah</strong>. Baca dulu sebelum klik lagi!</li>
+                        </ul>
+                    </div>
+
+                    <!-- Undo/Redo editor -->
+                    <div class="bg-white rounded-2xl p-6 border-2 border-slate-100 mb-6 shadow-sm">
+                        <p class="text-sm font-bold text-slate-700 mb-3"><i class="fas fa-edit mr-2 text-yellowDark"></i> <strong>Langkah 1:</strong> Ketik teks baru, lalu klik "Tambah Teks"</p>
+                        <div class="undo-editor" id="undo-text-display">(kosong)</div>
+                        <div class="mt-4 flex flex-wrap gap-2 items-center">
+                            <input type="text" id="undo-input" placeholder="Ketik kata baru (misal: Halo)" class="flex-1 min-w-[150px] bg-white border-2 border-slate-300 rounded-lg px-4 py-2.5 text-slate-800 outline-none focus:border-green-500">
+                            <button onclick="addText()" class="bg-green-500 hover:bg-green-600 text-white font-bold text-sm py-2.5 px-4 rounded-lg shadow-[0_4px_0_#15803D] flex items-center gap-2 transition-colors"><i class="fas fa-plus"></i> Tambah</button>
+                            <button onclick="undoText()" class="bg-blueBright hover:bg-blue-600 text-white font-bold text-sm py-2.5 px-4 rounded-lg shadow-[0_4px_0_#1565C0] flex items-center gap-2 transition-colors"><i class="fas fa-undo"></i> Undo</button>
+                            <button onclick="redoText()" class="bg-yellowBright hover:bg-yellow-500 text-slate-800 font-bold text-sm py-2.5 px-4 rounded-lg shadow-[0_4px_0_#FF8F00] flex items-center gap-2 transition-colors"><i class="fas fa-redo"></i> Redo</button>
+                        </div>
+                    </div>
+
+                    <!-- CPU + RAM -->
+                    <p class="text-sm font-bold text-slate-700 mb-2"><i class="fas fa-memory mr-2 text-yellowDark"></i> <strong>Langkah 2:</strong> Ini yang terjadi di dalam komputer</p>
+                    <div class="cpu-ram-scene">
+                        <div class="cpu-unit" id="cpu-stack" style="background: linear-gradient(135deg, #E3F2FD, #BBDEFB); border-color: #64B5F6; color: #0D47A1;">
+                            <div class="chip">🧠</div>
+                            <div class="label">CPU</div>
+                            <div class="cpu-sub">Otak Komputer</div>
+                            <div class="status" id="cpu-stack-status" style="color: #1565C0;">Idle</div>
+                        </div>
+                        <div class="data-bus">
+                            <div class="bus-arrow" id="bus-stack-to-ram">→</div>
+                            <div class="bus-arrow" id="bus-stack-to-cpu">←</div>
+                        </div>
+                        <div class="ram-unit">
+                            <div class="ram-header"><i class="fas fa-server"></i> RAM — Stack</div>
+                            <div class="ram-sub">Data disimpan bertumpuk — lapisan baru di atas</div>
+                            <div class="ram-grid" id="ram-stack-grid"></div>
+                        </div>
+                    </div>
+
+                    <div class="instruction-panel" id="inst-stack">
+                        <span class="step-badge">INFO</span>
+                        <span>Ketik teks di atas, lalu klik "Tambah" untuk melihat CPU menyimpan ke Stack di RAM.</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- QUEUE -->
+            <section id="queue" class="section-content">
+                <div class="glass-card p-6 sm:p-10 mb-8 border-t-8 border-blueBright">
+                    <div class="flex justify-between items-start mb-6 border-b-2 border-slate-100 pb-4">
+                        <h2 class="font-heading font-bold text-3xl text-blueDark">E. Queue (Antrean)</h2>
+                        <button onclick="playAudio('text-queue', event)" class="btn-secondary px-4 py-2 rounded-xl flex items-center gap-2 text-sm"><i class="fas fa-volume-up"></i> <span class="hidden sm:inline">Dengarkan</span></button>
+                    </div>
+                    <div id="text-queue" class="space-y-6">
+                        <p class="text-lg text-slate-700 leading-relaxed text-justify"><strong>Queue</strong> atau antrean adalah struktur data yang meniru cara kita mengantre di dunia nyata, seperti saat membeli tiket bioskop atau makanan di kantin. Queue menganut prinsip <strong>FIFO (First In First Out)</strong>, yang berarti "Yang Pertama Masuk, Dia Yang Pertama Keluar". Siapa pun yang datang lebih dulu, dialah yang akan dilayani lebih dulu.</p>
+                        
+                        <p class="text-lg text-slate-700 leading-relaxed text-justify">Berbeda dengan Stack yang hanya punya satu pintu, Queue memiliki dua pintu: pintu masuk di bagian belakang (disebut operasi <strong>ENQUEUE</strong>) dan pintu keluar di bagian depan (disebut operasi <strong>DEQUEUE</strong>). Sistem antrean ini sangat adil dan banyak digunakan dalam sistem komputer.</p>
+
+                        <!-- GAMBAR 5 -->
+                        <div class="my-6 bg-gradient-to-br from-emerald-50 to-teal-50 rounded-2xl p-6 md:p-8 border border-emerald-100 shadow-sm flex flex-col items-center">
+                            <span class="bg-emerald-600 text-white px-3 py-1 rounded-full text-sm font-bold tracking-wider mb-2 shadow-sm">KONSEP FIFO</span>
+                            <h4 class="font-bold text-emerald-900 text-xl mb-6 text-center">First In, First Out (Sistem Antrean)</h4>
+                            <div class="w-full max-w-2xl relative">
+                                <div class="flex justify-between w-full mb-4 px-2 md:px-8">
+                                    <div class="text-center">
+                                        <div class="text-blue-600 font-bold mb-1"><i class="fas fa-sign-out-alt text-2xl"></i></div>
+                                        <div class="bg-white px-3 py-1 rounded-lg shadow-sm border border-slate-100 text-sm font-bold text-slate-700">DEQUEUE (Keluar)</div>
+                                        <div class="text-xs text-slate-500 mt-1">Bagian Depan (Front)</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="text-green-600 font-bold mb-1"><i class="fas fa-sign-in-alt text-2xl"></i></div>
+                                        <div class="bg-white px-3 py-1 rounded-lg shadow-sm border border-slate-100 text-sm font-bold text-slate-700">ENQUEUE (Masuk)</div>
+                                        <div class="text-xs text-slate-500 mt-1">Bagian Belakang (Rear)</div>
+                                    </div>
+                                </div>
+                                <div class="w-full h-24 border-y-4 border-slate-700 bg-white flex items-center p-2 gap-2 justify-start relative shadow-inner overflow-hidden rounded-lg">
+                                    <div class="absolute inset-0 opacity-5" style="background-image: repeating-linear-gradient(45deg, #000 0, #000 2px, transparent 2px, transparent 10px);"></div>
+                                    <div class="w-20 h-16 bg-emerald-500 rounded-lg flex flex-col items-center justify-center text-white text-xs font-bold shrink-0 relative z-10 border-b-4 border-emerald-700 shadow-md">
+                                        <i class="fas fa-user mb-1 text-lg"></i> Orang 1<br><span class="text-[10px] font-normal">(Dilayani)</span>
+                                    </div>
+                                    <div class="w-20 h-16 bg-emerald-400 rounded-lg flex flex-col items-center justify-center text-white text-xs font-bold shrink-0 relative z-10 border-b-4 border-emerald-600 shadow-md">
+                                        <i class="fas fa-user mb-1 text-lg"></i> Orang 2
+                                    </div>
+                                    <div class="w-20 h-16 bg-emerald-300 rounded-lg flex flex-col items-center justify-center text-white text-xs font-bold shrink-0 relative z-10 border-b-4 border-emerald-500 shadow-md">
+                                        <i class="fas fa-user mb-1 text-lg"></i> Orang 3
+                                    </div>
+                                    <div class="absolute right-4 w-20 h-16 bg-slate-100 border-2 border-dashed border-slate-400 rounded-lg flex flex-col items-center justify-center text-slate-500 text-xs font-bold shrink-0 z-10 animate-pulse">
+                                        <i class="fas fa-user-plus mb-1 text-lg"></i> Orang 4
+                                    </div>
+                                    <div class="absolute left-0 top-1/2 transform -translate-y-1/2 -translate-x-6 text-blue-500 text-3xl opacity-50"><i class="fas fa-angle-double-left"></i></div>
+                                    <div class="absolute right-0 top-1/2 transform -translate-y-1/2 translate-x-6 text-green-500 text-3xl opacity-50"><i class="fas fa-angle-double-left"></i></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-emerald-50 border-l-4 border-emerald-500 p-4 rounded-r-xl">
+                            <h4 class="font-bold text-emerald-800 flex items-center gap-2"><i class="fas fa-lightbulb"></i> Analogi</h4>
+                            <p class="text-emerald-900 mt-2">Queue seperti antrean beli jajan di kantin. Murid yang datang lebih dulu akan dilayani lebih dulu!</p>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                            <div class="bg-white p-5 border border-slate-100 rounded-xl shadow-sm">
+                                <h4 class="font-bold text-slate-800 mb-3 border-b pb-2 flex items-center gap-2"><i class="fas fa-list text-emerald-500"></i> Contoh Sehari-hari</h4>
+                                <ul class="list-disc list-inside text-slate-600 space-y-2">
+                                    <li>Antrean di kantin</li>
+                                    <li>Antrean cetak dokumen di printer</li>
+                                    <li>Antrean kasir supermarket</li>
+                                    <li>Antrean drive-thru restoran</li>
+                                </ul>
+                            </div>
+                            <div class="bg-white p-5 border border-slate-100 rounded-xl shadow-sm">
+                                <h4 class="font-bold text-slate-800 mb-3 border-b pb-2 flex items-center gap-2"><i class="fas fa-code text-emerald-500"></i> Penerapan Programming</h4>
+                                <ul class="list-disc list-inside text-slate-600 space-y-2">
+                                    <li>Penjadwalan proses (CPU scheduling)</li>
+                                    <li>Antrean pesan (message queue)</li>
+                                    <li>Buffering data streaming</li>
+                                    <li>BFS (Breadth-First Search) algoritma</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Video Queue (Lokal) -->
+                        <div class="video-wrapper aspect-video mt-4">
+                            <video controls>
+                                <source src="Queue.mp4" type="video/mp4">
+                                Browser Anda tidak mendukung pemutar video.
+                            </video>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SIMULASI SEDERHANA: QUEUE -->
+                <div class="glass-card p-6 sm:p-10 border-t-8 border-yellowBright mb-8">
+                    <h3 class="font-heading font-bold text-2xl text-blueDark mb-2"><i class="fas fa-users text-yellowDark mr-2"></i> Simulasi 1: Queue Sederhana</h3>
+                    <p class="text-slate-500 mb-6 text-justify">Coba ENQUEUE untuk menambah antrean belakang, dan DEQUEUE untuk mengambil dari depan (FIFO).</p>
+                    <div class="flex flex-col gap-8">
+                        <div class="flex flex-col md:flex-row gap-4 bg-slate-50 p-6 rounded-2xl border-2 border-slate-100 items-end">
+                            <div class="w-full md:w-1/3">
+                                <label class="block text-sm font-bold text-slate-700 mb-1">Data Masuk:</label>
+                                <input type="text" id="queueInput" placeholder="Masukkan angka/teks" class="w-full bg-white border-2 border-slate-300 rounded-lg p-3 text-slate-800 outline-none focus:border-blueBright">
+                            </div>
+                            <button onclick="enqueue()" class="bg-blueBright hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-lg transition-colors flex justify-center items-center gap-2 shadow-[0_4px_0_#1565C0]"><i class="fas fa-arrow-right"></i> ENQUEUE</button>
+                            <button onclick="dequeue()" class="bg-yellowBright hover:bg-yellow-500 text-slate-800 font-bold py-3 px-6 rounded-lg transition-colors flex justify-center items-center gap-2 shadow-[0_4px_0_#FF8F00]">DEQUEUE <i class="fas fa-arrow-right"></i></button>
+                        </div>
+                        <div class="bg-white rounded-xl border-2 border-slate-100 relative py-10 px-4 overflow-hidden shadow-inner">
+                            <div class="absolute left-2 top-2 text-xs font-bold text-blueBright uppercase tracking-widest"><i class="fas fa-door-open"></i> Pintu Keluar (Depan)</div>
+                            <div class="absolute right-2 top-2 text-xs font-bold text-yellowDark uppercase tracking-widest">Pintu Masuk (Belakang) <i class="fas fa-sign-in-alt"></i></div>
+                            <div id="queue-visual-container" class="queue-container gap-2 w-full min-h-[80px] items-center pt-4"></div>
+                        </div>
+                        <div class="bg-slate-50 p-4 rounded-xl border-2 border-slate-100">
+                            <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Log Operasi & Hasil Dequeue:</h4>
+                            <ul id="queueLog" class="text-sm text-slate-700 font-mono space-y-1 h-24 overflow-y-auto">
+                                <li class="text-slate-400 italic">Belum ada antrean.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SIMULASI CPU+RAM: QUEUE (Print) -->
+                <div class="glass-card p-6 sm:p-10 border-t-8 border-yellowBright">
+                    <div class="flex items-start gap-3 mb-4">
+                        <div class="bg-yellow-100 text-yellowDark p-3 rounded-xl shadow-sm"><i class="fas fa-microchip text-2xl"></i></div>
+                        <div>
+                            <h3 class="font-heading font-bold text-2xl text-blueDark">Simulasi 2: Queue di CPU & RAM (contoh: Antrean Print)</h3>
+                            <p class="text-slate-500 mt-1 text-justify">Pernahkah print 3 dokumen sekaligus di lab komputer? Printer mencetak <strong>satu per satu, sesuai urutan</strong> — tidak bisa lompat!</p>
+                        </div>
+                    </div>
+
+                    <!-- Cara baca simulator -->
+                    <div class="bg-[#E3F2FD] border-2 border-[#90CAF9] p-5 rounded-2xl mb-6 shadow-sm">
+                        <h4 class="font-heading font-bold text-blueDark text-sm mb-2"><i class="fas fa-book-open text-blueBright"></i> Cara baca simulator di bawah:</h4>
+                        <ul class="text-xs text-slate-700 space-y-1.5 list-disc list-inside font-semibold">
+                            <li>🧠 Kotak <strong>kiri</strong> (biru) = <strong>CPU</strong> — "otak" yang memberi perintah print ke printer.</li>
+                            <li>💾 Kotak <strong>kanan</strong> (abu-abu) = <strong>RAM</strong> — menyimpan antrean dokumen di memori.</li>
+                            <li><strong>FRONT</strong> = pintu keluar (depan) — dokumen paling awal, yang dicetak dulu.</li>
+                            <li><strong>REAR</strong> = pintu masuk (belakang) — dokumen paling baru.</li>
+                            <li>Setiap klik "Cetak Depan", CPU mengambil dokumen dari FRONT lalu mengirim ke printer.</li>
+                            <li>Panel di bawah = <strong>narasi langkah demi langkah</strong>. Baca dulu, baru klik lagi!</li>
+                        </ul>
+                    </div>
+
+                    <!-- Print queue example -->
+                    <div class="bg-white rounded-2xl p-6 border-2 border-slate-100 mb-6 shadow-sm">
+                        <p class="text-sm font-bold text-slate-700 mb-4"><i class="fas fa-print mr-2 text-yellowDark"></i> <strong>Langkah 1:</strong> Ini "antrean print" di komputer</p>
+                        <div id="print-queue-display" class="mb-4 min-h-[80px]"></div>
+                        <div class="mb-2">
+                            <p class="text-xs font-bold text-slate-500 mb-2">Sudah Tercetak:</p>
+                            <div id="printed-display" class="flex flex-wrap gap-2 min-h-[30px]"></div>
+                        </div>
+                        <div class="mt-4 flex flex-wrap gap-2 items-center">
+                            <input type="text" id="print-input" placeholder="Nama dokumen baru (contoh: Tugas.pdf)" class="flex-1 min-w-[180px] bg-white border-2 border-slate-300 rounded-lg px-4 py-2.5 text-slate-800 outline-none focus:border-blueBright">
+                            <button onclick="addPrintJob()" class="bg-blueBright hover:bg-blue-600 text-white font-bold text-sm py-2.5 px-4 rounded-lg shadow-[0_4px_0_#1565C0] flex items-center gap-2 transition-colors"><i class="fas fa-plus"></i> Tambah</button>
+                            <button onclick="processNextPrint()" class="bg-yellowBright hover:bg-yellow-500 text-slate-800 font-bold text-sm py-2.5 px-4 rounded-lg shadow-[0_4px_0_#FF8F00] flex items-center gap-2 transition-colors"><i class="fas fa-print"></i> Cetak Depan</button>
+                            <button onclick="resetPrint()" class="bg-slate-400 hover:bg-slate-500 text-white font-bold text-sm py-2.5 px-3 rounded-lg shadow-[0_4px_0_#334155] flex items-center gap-2 transition-colors"><i class="fas fa-redo"></i></button>
+                        </div>
+                    </div>
+
+                    <!-- CPU + RAM -->
+                    <p class="text-sm font-bold text-slate-700 mb-2"><i class="fas fa-memory mr-2 text-yellowDark"></i> <strong>Langkah 2:</strong> Ini yang terjadi di dalam komputer</p>
+                    <div class="cpu-ram-scene">
+                        <div class="cpu-unit" id="cpu-queue" style="background: linear-gradient(135deg, #E3F2FD, #BBDEFB); border-color: #64B5F6; color: #0D47A1;">
+                            <div class="chip">🧠</div>
+                            <div class="label">CPU</div>
+                            <div class="cpu-sub">Otak Komputer</div>
+                            <div class="status" id="cpu-queue-status" style="color: #1565C0;">Idle</div>
+                        </div>
+                        <div class="data-bus">
+                            <div class="bus-arrow" id="bus-queue-to-ram">→</div>
+                            <div class="bus-arrow" id="bus-queue-to-cpu">←</div>
+                        </div>
+                        <div class="ram-unit">
+                            <div class="ram-header"><i class="fas fa-server"></i> RAM — Queue</div>
+                            <div class="ram-sub">Antrean dokumen — depan keluar, belakang masuk</div>
+                            <div class="ram-grid" id="ram-queue-grid"></div>
+                        </div>
+                    </div>
+
+                    <div class="instruction-panel" id="inst-queue">
+                        <span class="step-badge">INFO</span>
+                        <span>Tambahkan dokumen baru (masuk antrean belakang) atau klik "Cetak Depan" untuk melihat CPU memproses dari depan.</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- RANGKUMAN -->
+            <section id="rangkuman" class="section-content">
+                <div class="glass-card p-6 sm:p-10 border-t-8 border-blueBright">
+                    <div class="flex justify-between items-start mb-6 border-b-2 border-slate-100 pb-4">
+                        <h2 class="font-heading font-bold text-3xl text-blueDark">F. Rangkuman Perbandingan</h2>
+                    </div>
+                    <div class="overflow-x-auto rounded-xl border-2 border-slate-200 shadow-sm">
+                        <table class="w-full text-left border-collapse bg-white">
+                            <thead>
+                                <tr class="bg-[#E3F2FD] text-blueDark font-heading">
+                                    <th class="p-4 font-bold border-b-2 border-slate-200">Struktur Data</th>
+                                    <th class="p-4 font-bold border-b-2 border-slate-200">Prinsip</th>
+                                    <th class="p-4 font-bold border-b-2 border-slate-200">Operasi</th>
+                                    <th class="p-4 font-bold border-b-2 border-slate-200">Contoh Nyata</th>
+                                    <th class="p-4 font-bold border-b-2 border-slate-200">Software</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-slate-600 font-sans">
+                                <tr class="border-b border-slate-100 hover:bg-slate-50 transition-colors">
+                                    <td class="p-4 font-bold text-blueBright">Array/List</td>
+                                    <td class="p-4">Akses lewat indeks/posisi</td>
+                                    <td class="p-4">Simpan & akses data</td>
+                                    <td class="p-4">Rak buku bernomor</td>
+                                    <td class="p-4">Excel, tabel data</td>
+                                </tr>
+                                <tr class="border-b border-slate-100 hover:bg-slate-50 transition-colors">
+                                    <td class="p-4 font-bold text-yellowDark">Stack</td>
+                                    <td class="p-4 font-mono text-yellowDark">LIFO</td>
+                                    <td class="p-4">Push, Pop</td>
+                                    <td class="p-4">Tumpukan piring</td>
+                                    <td class="p-4">Ctrl+Z (Undo)</td>
+                                </tr>
+                                <tr class="hover:bg-slate-50 transition-colors">
+                                    <td class="p-4 font-bold text-blueBright">Queue</td>
+                                    <td class="p-4 font-mono text-blueBright">FIFO</td>
+                                    <td class="p-4">Enqueue, Dequeue</td>
+                                    <td class="p-4">Antre kantin</td>
+                                    <td class="p-4">Antrean printer</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="mt-8 bg-gradient-to-r from-blueBright to-[#64B5F6] rounded-2xl p-6 text-white shadow-lg">
+                        <h3 class="font-heading font-bold text-xl mb-2 flex items-center gap-2"><i class="fas fa-graduation-cap"></i> Kesimpulan</h3>
+                        <p class="text-white leading-relaxed text-justify font-sans">Setiap struktur data punya "aturan main" berbeda. <strong>Array</strong> unggul dalam akses cepat berdasarkan posisi (seperti Excel). <strong>Stack</strong> sempurna untuk operasi yang butuh "kembali ke belakang" (seperti Ctrl+Z). <strong>Queue</strong> ideal untuk sistem antrean yang adil (seperti printer). Memilih struktur data yang tepat sama halnya dengan memilih alat yang tepat untuk menyelesaikan pekerjaan secara efisien!</p>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+        </div>
+    </div>
+
+    <script>
+        /* ============ LANDING PAGE LOGIC ============ */
+        function startLearning() {
+            const landing = document.getElementById('landingPage');
+            const app = document.getElementById('mainApp');
+            
+            // Langsung sembunyikan dan tampilkan tanpa animasi
+            landing.classList.add('hidden');
+            app.classList.remove('hidden');
+            app.classList.add('flex');
+        }
+
+        /* ============ NAVIGATION ============ */
+        function showSection(sectionId, btn) {
+            window.speechSynthesis.cancel();
+            // Pause semua video saat berpindah section
+            document.querySelectorAll('video').forEach(vid => vid.pause());
+            document.querySelectorAll('iframe').forEach(el => { if (el.pause) try { el.pause(); } catch(e){} });
+            
+            document.querySelectorAll('.section-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById(sectionId).classList.add('active');
+            if (btn) btn.classList.add('active');
+            document.getElementById('zoomWrapper').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        /* ============ ZOOM ============ */
+        let currentZoom = 1;
+        function applyZoom() {
+            const el = document.getElementById('zoomWrapper');
+            if ('zoom' in document.body.style) { el.style.zoom = currentZoom; }
+            else { el.style.transform = `scale(${currentZoom})`; el.style.transformOrigin = 'top center'; }
+            document.getElementById('zoomLevel').textContent = Math.round(currentZoom * 100) + '%';
+        }
+        function zoomIn() { currentZoom = Math.min(currentZoom + 0.1, 2.0); applyZoom(); }
+        function zoomOut() { currentZoom = Math.max(currentZoom - 0.1, 0.6); applyZoom(); }
+        function resetZoom() { currentZoom = 1; applyZoom(); }
+
+        /* ============ TTS ============ */
+        function playAudio(elementId, event) {
+            window.speechSynthesis.cancel();
+            const textElement = document.getElementById(elementId);
+            if (!textElement) return;
+            const textToRead = textElement.innerText.replace(/\s+/g, ' ').trim();
+            const utterance = new SpeechSynthesisUtterance(textToRead);
+            utterance.lang = 'id-ID'; utterance.rate = 0.9; utterance.pitch = 1;
+            window.speechSynthesis.speak(utterance);
+            const btn = event ? event.currentTarget : null;
+            if (!btn) return;
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span class="hidden sm:inline">Membaca...</span>';
+            utterance.onend = () => { btn.innerHTML = originalHTML; };
+            utterance.onerror = () => { btn.innerHTML = originalHTML; };
+        }
+
+        /* ============ HELPERS ============ */
+        function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+        function setInstruction(sim, badge, text) {
+            const panel = document.getElementById(`inst-${sim}`);
+            if (!panel) return;
+            panel.innerHTML = `<span class="step-badge">${badge}</span><span>${text}</span>`;
+        }
+        
+        /* Animasi CPU+RAM Sangat Lambat (6000 ms per langkah) */
+        async function runCPURAM(sim, steps) {
+            const cpu = document.getElementById(`cpu-${sim}`);
+            const cpuStatus = document.getElementById(`cpu-${sim}-status`);
+            const toRam = document.getElementById(`bus-${sim}-to-ram`);
+            const toCpu = document.getElementById(`bus-${sim}-to-cpu`);
+            const inst = document.getElementById(`inst-${sim}`);
+            for (const step of steps) {
+                inst.innerHTML = `<span class="step-badge">${step.badge}</span><span>${step.text}</span>`;
+                inst.classList.add('highlight');
+                if (step.cpuStatus !== undefined) cpuStatus.textContent = step.cpuStatus;
+                if (step.cpuActive) cpu.classList.add('active');
+                if (step.arrowToRam) toRam.classList.add('active');
+                if (step.arrowToCpu) toCpu.classList.add('active');
+                document.querySelectorAll(`#ram-${sim}-grid .ram-cell`).forEach(c => c.classList.remove('fetching'));
+                if (step.ramHighlight !== undefined && step.ramHighlight !== null) {
+                    const cell = document.getElementById(`ram-${sim}-cell-${step.ramHighlight}`);
+                    if (cell) cell.classList.add('fetching');
+                }
+                await sleep(step.delay || 6000);
+                toRam.classList.remove('active');
+                toCpu.classList.remove('active');
+            }
+            cpu.classList.remove('active');
+            cpuStatus.textContent = 'Idle';
+            inst.classList.remove('highlight');
+        }
+
+        /* ============ SIMULASI SEDERHANA: ARRAY ============ */
+        let arrayData = ["Kucing", "Ayam", "-", "-", "-", "-", "-"];
+        function renderArray() {
+            const container = document.getElementById('array-container');
+            container.innerHTML = '';
+            arrayData.forEach((val, index) => {
+                const box = document.createElement('div');
+                box.className = 'flex flex-col items-center gap-2 sim-item';
+                const dataBox = document.createElement('div');
+                dataBox.className = `w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center rounded-xl font-bold text-sm sm:text-base shadow-sm border-2 ${val !== '-' ? 'bg-[#E3F2FD] border-[#64B5F6] text-blueDark' : 'bg-white border-slate-200 text-slate-400'}`;
+                dataBox.textContent = val;
+                const indexLabel = document.createElement('div');
+                indexLabel.className = 'text-xs font-mono font-bold text-slate-500 bg-slate-200 px-3 py-1 rounded-md';
+                indexLabel.textContent = `[${index}]`;
+                box.appendChild(dataBox); box.appendChild(indexLabel); container.appendChild(box);
+            });
+        }
+        function updateArray() {
+            const index = parseInt(document.getElementById('arrayIndex').value);
+            const val = document.getElementById('arrayValue').value.trim();
+            if (val === '') return;
+            arrayData[index] = val;
+            renderArray();
+            document.getElementById('arrayValue').value = '';
+        }
+
+        /* ============ SIMULASI SEDERHANA: STACK ============ */
+        let stackArr = [];
+        const maxStack = 6;
+        function updateStackLog(message) {
+            const logList = document.getElementById('stackLog');
+            if (logList.children[0] && logList.children[0].classList.contains('italic')) logList.innerHTML = '';
+            const li = document.createElement('li');
+            li.innerHTML = `<i class="fas fa-angle-right text-yellowDark mr-2"></i> ${message}`;
+            logList.prepend(li);
+        }
+        function renderStack() {
+            const container = document.getElementById('stack-visual-container');
+            container.innerHTML = '';
+            stackArr.forEach((val) => {
+                const item = document.createElement('div');
+                item.className = 'w-full h-12 bg-yellowBright text-slate-800 font-bold rounded-md flex items-center justify-center sim-item shadow-md border-b-4 border-yellowDark';
+                item.textContent = val;
+                container.appendChild(item);
+            });
+        }
+        function pushStack() {
+            const val = document.getElementById('stackInput').value.trim();
+            if (val === '') return;
+            if (stackArr.length >= maxStack) { updateStackLog(`<span class="text-red-500">Gagal PUSH: Stack Penuh!</span>`); return; }
+            stackArr.push(val);
+            updateStackLog(`PUSH: Memasukkan [${val}]`);
+            renderStack();
+            document.getElementById('stackInput').value = '';
+        }
+        function popStack() {
+            if (stackArr.length === 0) { updateStackLog(`<span class="text-red-500">Gagal POP: Stack Kosong!</span>`); return; }
+            const popped = stackArr.pop();
+            updateStackLog(`POP: Mengambil <strong class="bg-yellow-100 text-yellowDark px-2 py-0.5 rounded border border-yellow-300">Hasil = ${popped}</strong>`);
+            renderStack();
+        }
+
+        /* ============ SIMULASI SEDERHANA: QUEUE ============ */
+        let queueArr = [];
+        const maxQueue = 6;
+        function updateQueueLog(message) {
+            const logList = document.getElementById('queueLog');
+            if (logList.children[0] && logList.children[0].classList.contains('italic')) logList.innerHTML = '';
+            const li = document.createElement('li');
+            li.innerHTML = `<i class="fas fa-angle-right text-blueBright mr-2"></i> ${message}`;
+            logList.prepend(li);
+        }
+        function renderQueue() {
+            const container = document.getElementById('queue-visual-container');
+            container.innerHTML = '';
+            queueArr.forEach((val, idx) => {
+                const item = document.createElement('div');
+                item.className = 'h-16 px-6 bg-blueBright text-white font-bold rounded-lg flex items-center justify-center sim-item shadow-md border-b-4 border-blueDark shrink-0';
+                if (idx === 0) item.innerHTML = `<span class="mr-2 text-xs opacity-75">DEPAN</span> ${val}`;
+                else item.textContent = val;
+                container.appendChild(item);
+            });
+        }
+        function enqueue() {
+            const val = document.getElementById('queueInput').value.trim();
+            if (val === '') return;
+            if (queueArr.length >= maxQueue) { updateQueueLog(`<span class="text-red-500">Gagal ENQUEUE: Antrean Penuh!</span>`); return; }
+            queueArr.push(val);
+            updateQueueLog(`ENQUEUE: Masuk antrean [${val}]`);
+            renderQueue();
+            document.getElementById('queueInput').value = '';
+        }
+        function dequeue() {
+            if (queueArr.length === 0) { updateQueueLog(`<span class="text-red-500">Gagal DEQUEUE: Antrean Kosong!</span>`); return; }
+            const deq = queueArr.shift();
+            updateQueueLog(`DEQUEUE: Keluar antrean <strong class="bg-blue-100 text-blueDark px-2 py-0.5 rounded border border-blue-300">Hasil = ${deq}</strong>`);
+            renderQueue();
+        }
+
+        /* ============ CPU+RAM: ARRAY (Excel) ============ */
+        const excelData = ['Nama', 'Nilai', 'Ani', '85', 'Budi', '92'];
+        const excelLabels = ['A1', 'B1', 'A2', 'B2', 'A3', 'B3'];
+        let arrayBusy = false;
+        async function excelClick(idx) {
+            if (arrayBusy) return;
+            arrayBusy = true;
+            const cellEl = document.querySelector(`[data-excel-idx="${idx}"]`);
+            if (cellEl) { cellEl.classList.add('clicked'); setTimeout(() => cellEl.classList.remove('clicked'), 1500); }
+            const value = excelData[idx];
+            const label = excelLabels[idx];
+            await runCPURAM('array', [
+                { badge: '1/4', text: `Kamu baru saja klik <strong>sel ${label}</strong> di Excel (isinya "${value}"). CPU menerima perintah ini.`, cpuStatus: 'Menunggu...', delay: 6000 },
+                { badge: '2/4', text: `CPU berkata: "Alamat <strong>${label}</strong> sudah kuketahui, langsung kuambil datanya!"`, cpuStatus: `Mencari ${label}...`, cpuActive: true, delay: 6000 },
+                { badge: '3/4', text: `CPU meminta data ke RAM melalui "jalan data" (panah ke kanan menyala).`, arrowToRam: true, delay: 6000 },
+                { badge: '4/4', text: `RAM mengirim isi sel: "<strong>${value}</strong>" ke CPU (panah ke kiri menyala).`, ramHighlight: idx, cpuStatus: 'Menerima data...', arrowToCpu: true, delay: 6000 }
+            ]);
+            setInstruction('array', '✓ SELESAI', `Nilai "<strong>${value}</strong>" dari sel ${label} sudah tampil di Excel! CPU tidak perlu memeriksa sel lain — itulah kecepatan Array.`);
+            arrayBusy = false;
+        }
+
+        /* ============ CPU+RAM: STACK (Undo/Redo) ============ */
+        let undoStates = [''];
+        let currentStateIndex = 0;
+        let stackBusy = false;
+        function renderUndoUI() {
+            document.getElementById('undo-text-display').textContent = undoStates[currentStateIndex] || '(kosong)';
+            const grid = document.getElementById('ram-stack-grid');
+            grid.innerHTML = '';
+            const maxVisible = 5;
+            const startIdx = Math.max(0, currentStateIndex - maxVisible + 1);
+            const cells = [];
+            for (let i = 0; i < maxVisible; i++) {
+                const stateIdx = startIdx + i;
+                const exists = stateIdx <= currentStateIndex && stateIdx >= 0;
+                const isTop = stateIdx === currentStateIndex && currentStateIndex > 0;
+                const cell = document.createElement('div');
+                cell.className = 'ram-cell';
+                cell.id = `ram-stack-cell-${stateIdx}`;
+                if (!exists) {
+                    cell.classList.add('empty');
+                    cell.innerHTML = `<div class="addr">—</div><div class="val">kosong</div>`;
+                } else {
+                    if (isTop) cell.classList.add('highlighted');
+                    const text = undoStates[stateIdx];
+                    const short = text.length > 10 ? text.slice(-8) : text;
+                    cell.innerHTML = `<div class="addr">Lapisan ${stateIdx + 1}</div><div class="val">"${short || '(kosong)'}"</div>`;
+                }
+                cells.push(cell);
+            }
+            cells.forEach(c => grid.appendChild(c));
+        }
+        async function addText() {
+            if (stackBusy) return;
+            const input = document.getElementById('undo-input');
+            const newText = input.value.trim();
+            if (!newText) { setInstruction('stack', '⚠', 'Ketik dulu teks di kotak input, baru klik "Tambah" ya!'); return; }
+            
+            if (newText === undoStates[currentStateIndex]) {
+                setInstruction('stack', '⚠', 'Teks tersebut sudah ada di dokumen. Ketik kata baru!');
+                return;
+            }
+
+            stackBusy = true;
+            undoStates = undoStates.slice(0, currentStateIndex + 1);
+            const prevState = undoStates[currentStateIndex];
+            const newState = prevState ? prevState + ' ' + newText : newText;
+            undoStates.push(newState);
+            currentStateIndex = undoStates.length - 1;
+            renderUndoUI();
+            
+            await runCPURAM('stack', [
+                { badge: '1/3', text: `Kamu baru saja mengetik "<strong>${newText}</strong>" di dokumen. CPU menerima perintah untuk menyimpan.`, cpuStatus: 'Menunggu...', delay: 6000 },
+                { badge: '2/3', text: `CPU menyimpan teks ini sebagai <strong>lapisan baru</strong> di atas Stack RAM (panah ke kanan menyala).`, cpuStatus: 'Menyimpan...', cpuActive: true, arrowToRam: true, delay: 6000 },
+                { badge: '3/3', text: `Data sudah tersimpan! Dokumen sekarang berisi: "<strong>${newState}</strong>"`, ramHighlight: currentStateIndex, delay: 6000 }
+            ]);
+            setInstruction('stack', '✓ TERSIMPAN', `Teks ditambahkan ke atas Stack. Kalau kamu klik <strong>Undo (Ctrl+Z)</strong>, CPU akan membuang lapisan teratas ini.`);
+            input.value = '';
+            stackBusy = false;
+        }
+        async function undoText() {
+            if (stackBusy) return;
+            if (currentStateIndex <= 0) { setInstruction('stack', '⚠', 'Tidak ada yang bisa di-undo. Tambahkan teks dulu ya!'); return; }
+            stackBusy = true;
+            const removedState = undoStates[currentStateIndex];
+            currentStateIndex--;
+            const prevState = undoStates[currentStateIndex];
+            await runCPURAM('stack', [
+                { badge: '1/3', text: `Kamu baru saja klik <strong>Undo (Ctrl+Z)</strong>. CPU menerima perintah "batalkan yang terakhir".`, cpuStatus: 'Menunggu...', delay: 6000 },
+                { badge: '2/3', text: `CPU berkata: "Ambil data PALING ATAS dari Stack, lalu buang!" (panah ke kiri menyala).`, cpuStatus: 'POP data teratas...', cpuActive: true, arrowToCpu: true, delay: 6000 },
+                { badge: '3/3', text: `Data terakhir "<strong>${removedState}</strong>" dibuang. Dokumen kembali ke: "<strong>${prevState || '(kosong)'}</strong>"`, delay: 6000 }
+            ]);
+            renderUndoUI();
+            setInstruction('stack', '✓ UNDO BERHASIL', `Ini persis seperti Ctrl+Z di Word atau Excel — data paling atas dibuang dari Stack.`);
+            stackBusy = false;
+        }
+        async function redoText() {
+            if (stackBusy) return;
+            if (currentStateIndex >= undoStates.length - 1) { setInstruction('stack', '⚠', 'Tidak ada yang bisa di-redo. Semua sudah tampil.'); return; }
+            stackBusy = true;
+            currentStateIndex++;
+            const restoredState = undoStates[currentStateIndex];
+            await runCPURAM('stack', [
+                { badge: '1/2', text: `Kamu baru saja klik <strong>Redo</strong>. CPU menerima perintah "kembalikan yang tadi dibatalkan".`, cpuStatus: 'Menunggu...', delay: 6000 },
+                { badge: '2/2', text: `CPU mengembalikan data terakhir ke atas Stack: "<strong>${restoredState}</strong>"`, cpuStatus: 'Mengembalikan...', cpuActive: true, arrowToRam: true, ramHighlight: currentStateIndex, delay: 6000 }
+            ]);
+            renderUndoUI();
+            setInstruction('stack', '✓ REDO BERHASIL', `Data yang tadi di-undo dikembalikan ke atas Stack.`);
+            stackBusy = false;
+        }
+
+        /* ============ CPU+RAM: QUEUE (Print) ============ */
+        let printJobs = ['Tugas.pdf', 'Foto.jpg'];
+        let printedJobs = [];
+        let queueBusy = false;
+        function renderPrintUI() {
+            const qd = document.getElementById('print-queue-display');
+            if (printJobs.length === 0) {
+                qd.innerHTML = '<p class="text-slate-400 italic text-sm text-center py-4 bg-slate-100 rounded-lg">Antrean kosong. Tambahkan dokumen baru di atas!</p>';
+            } else {
+                qd.innerHTML = printJobs.map((job, i) => `
+                    <div class="print-list-item ${i === 0 ? 'printing' : ''}">
+                        <i class="fas fa-file-alt text-${i === 0 ? 'yellowDark' : 'slate-400'}"></i>
+                        <span class="flex-1 font-semibold">${job}</span>
+                        ${i === 0 ? '<span class="text-[10px] bg-yellow-100 text-yellowDark border border-yellow-300 px-2 py-0.5 rounded font-bold">SEDANG DICETAK</span>' : `<span class="text-[10px] bg-slate-200 text-slate-600 px-2 py-0.5 rounded font-bold">Antrean #${i + 1}</span>`}
+                    </div>
+                `).join('');
+            }
+            const pd = document.getElementById('printed-display');
+            pd.innerHTML = printedJobs.length === 0
+                ? '<span class="text-slate-400 italic text-xs">Belum ada</span>'
+                : printedJobs.map(j => `<span class="text-xs bg-emerald-100 text-emerald-700 border border-emerald-300 px-2 py-1 rounded font-semibold">✓ ${j}</span>`).join('');
+            const grid = document.getElementById('ram-queue-grid');
+            grid.innerHTML = '';
+            const maxCells = 5;
+            for (let i = 0; i < maxCells; i++) {
+                const val = i < printJobs.length ? printJobs[i] : null;
+                const cell = document.createElement('div');
+                cell.className = 'ram-cell';
+                cell.id = `ram-queue-cell-${i}`;
+                if (val === null) {
+                    cell.classList.add('empty');
+                    cell.innerHTML = `<div class="addr">—</div><div class="val">kosong</div>`;
+                } else {
+                    if (i === 0) cell.classList.add('highlighted');
+                    const addr = i === 0 ? 'FRONT' : (i === printJobs.length - 1 && printJobs.length > 1 ? 'REAR' : `Kotak ${i + 1}`);
+                    const short = val.length > 9 ? val.slice(0, 7) + '..' : val;
+                    cell.innerHTML = `<div class="addr">${addr}</div><div class="val">${short}</div>`;
+                }
+                grid.appendChild(cell);
+            }
+        }
+        function addPrintJob() {
+            const input = document.getElementById('print-input');
+            const name = input.value.trim();
+            if (!name) { setInstruction('queue', '⚠', 'Tulis dulu nama dokumen di kotak, lalu klik "Tambah".'); return; }
+            if (printJobs.length >= 5) { setInstruction('queue', '⚠', 'Antrean memori sudah penuh (maks 5). Cetak dulu salah satu!'); return; }
+            printJobs.push(name);
+            renderPrintUI();
+            input.value = '';
+            setInstruction('queue', '✓ DITAMBAHKAN', `Dokumen "<strong>${name}</strong>" masuk ke <strong>belakang antrean</strong>. Sekarang ada ${printJobs.length} dokumen menunggu.`);
+        }
+        async function processNextPrint() {
+            if (queueBusy) return;
+            if (printJobs.length === 0) { setInstruction('queue', '⚠', 'Antrean kosong. Tambahkan dokumen dulu!'); return; }
+            queueBusy = true;
+            const job = printJobs[0];
+            await runCPURAM('queue', [
+                { badge: '1/4', text: `Printer baru saja minta: "CPU, ambil 1 job dari <strong>DEPAN antrean</strong>!"`, cpuStatus: 'Menunggu...', delay: 6000 },
+                { badge: '2/4', text: `CPU melihat job paling depan di RAM: "<strong>${job}</strong>"`, cpuStatus: `Membaca ${job}...`, cpuActive: true, delay: 6000 },
+                { badge: '3/4', text: `CPU mengambil job ini dari RAM lewat jalan data (panah ke kiri menyala).`, arrowToCpu: true, ramHighlight: 0, cpuStatus: 'Mengambil dari front...', delay: 6000 },
+                { badge: '4/4', text: `CPU mengirim job "<strong>${job}</strong>" ke printer untuk dicetak 🖨️`, cpuStatus: 'Mengirim ke printer...', arrowToRam: true, delay: 6000 }
+            ]);
+            printedJobs.push(job);
+            printJobs.shift();
+            renderPrintUI();
+            setInstruction('queue', '✓ SELESAI', `"<strong>${job}</strong>" sudah tercetak! ${printJobs.length > 0 ? `Job berikutnya (<strong>${printJobs[0]}</strong>) sekarang di depan antrean.` : 'Antrean kosong.'}`);
+            queueBusy = false;
+        }
+        function resetPrint() {
+            printJobs = ['Tugas.pdf', 'Foto.jpg'];
+            printedJobs = [];
+            renderPrintUI();
+            setInstruction('queue', 'INFO', 'Antrean sudah di-reset. 2 dokumen siap dicetak.');
+        }
+
+        /* ============ INIT ============ */
+        window.addEventListener('load', () => {
+            renderArray();
+            renderStack();
+            renderQueue();
+            renderUndoUI();
+            renderPrintUI();
+            applyZoom();
+        });
+    </script>
+</body>
+</html>
